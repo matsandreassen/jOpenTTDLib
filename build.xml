@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="jopenttdlib" default="default" basedir=".">
+    <description>Builds, tests, and runs the project jopenttdlib.</description>
+
+    <target name="init">
+        <echo message="Importing project.properties." />
+        <property file="project.properties" />
+
+        <property name="jopenttdlib.filename.base" value="${jopenttdlib.prefix}${jopenttdlib.version}" />
+        <property name="dist.jar" value="${jopenttdlib.filename.base}.jar" />
+        <property name="dist.src" value="${jopenttdlib.filename.base}-src.jar" />
+        <property name="dist.doc" value="${jopenttdlib.filename.base}-javadoc.jar" />
+        <property name="dist.zip" value="${jopenttdlib.filename.base}.zip" />
+        <property name="dist.dir.doc" value="${dist.dir}/javadoc" />
+    </target>
+
+    <target name="pre-dist" depends="init">
+        <mkdir dir="${dist.dir}"/>
+    </target>
+
+    <target name="build" depends="init">
+        <echo>Creating build directory.</echo>
+        <mkdir dir="${build.dir}"/>
+        <echo>Creating temporary directory for java class file generation.</echo>
+        <javac srcdir="${src.dir}" destdir="${build.dir}" />
+    </target>
+
+    <target name="pre-javadoc" depends="pre-dist">
+        <echo>Creating temporary directory for javadoc generation.</echo>
+        <mkdir dir="${dist.dir.doc}"/>
+    </target>
+
+    <target name="javadoc" depends="pre-javadoc,build">
+        <echo>Creating javadoc.</echo>
+        <javadoc windowtitle="jOpenTTDLib v${jopenttdlib.version}" destdir="${dist.dir.doc}" sourcepath="${src.dir}" />
+        <echo>Creating javadoc jar.</echo>
+        <jar destfile="${dist.dir}/${dist.doc}" basedir="${dist.dir.doc}" />
+    </target>
+
+<!--<target name="post-javadoc" depends="javadoc">
+        <echo>Deleting temporary directory for javadoc generation.</echo>
+        <delete dir="${dist.dir.doc}" />
+    </target>-->
+
+    <target name="jar" depends="build,pre-dist">
+        <echo>Creating binary jar file.</echo>
+        <jar destfile="${dist.dir}/${dist.jar}" basedir="${build.dir}">
+            <exclude name="**/action/**" />
+            <exclude name="*.properties" />
+            <manifest>
+                <attribute name="Main-Class" value="com.camelspotting.jotl.JOTLQuerier"/>
+            </manifest>
+        </jar>
+    </target>
+
+    <target name="src" depends="pre-dist">
+        <echo>Creating source jar.</echo>
+        <jar destfile="${dist.dir}/${dist.src}" basedir="${src.dir}">
+            <exclude name="*.properties" />
+            <exclude name="**/action/**" />
+        </jar>
+    </target>
+
+    <target name="default" depends="jar,javadoc,src">
+        <echo>Copy in project documents.</echo>
+        <copy file="About.txt" todir="${dist.dir}"/>
+        <copy file="License.txt" todir="${dist.dir}"/>
+        <echo>Creating zip file.</echo>
+        <zip destfile="${dist.dir}/${dist.zip}" basedir="${dist.dir}" excludes="*.zip" />
+        <echo>Removing project documents.</echo>
+        <delete file="${custom.build.dir}/License.txt" />
+        <delete file="${custom.build.dir}/About.txt" />
+        <echo>Completed build.</echo>
+    </target>
+
+    <target name="clean" depends="init">
+        <delete dir="${dist.dir}" />
+        <delete dir="${build.dir}" />
+    </target>
+</project>
