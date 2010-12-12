@@ -16,6 +16,9 @@
  */
 package com.camelspotting.jotl;
 
+import com.camelspotting.jotl.event.OpenTTDEvent;
+import com.camelspotting.jotl.event.OpenTTDEventType;
+import com.camelspotting.jotl.event.OpenTTDListener;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -192,7 +195,7 @@ public class ServerHandler {
                             } else {
                                 printDebugMessage("The maximum number of timeouts in a row(" + maxTimouts + ") been reached. Server may have gone down.");
                                 setUpdateInterval(-1);
-                                fireEvent(new OpenTTDEvent(OpenTTDEvent.Type.LOST_CONNECTION));
+                                fireEvent(new OpenTTDEvent(OpenTTDEventType.LOST_CONNECTION));
                                 printDebugMessage("Manual update mode has been set and any and all listeners have been notified.");
                             }
                         }
@@ -256,7 +259,7 @@ public class ServerHandler {
             if (diff < 0) {
                 // This is not a "new" game, but a game in progress
                 printDebugMessage("I found out a 'new game' was acually a game in progress.");
-                newgame = new OpenTTDEvent(OpenTTDEvent.Type.GAME_IN_PROGRESS, Integer.valueOf(currentUpdate.getServerResponseInfo().getGameDate()[2]));
+                newgame = new OpenTTDEvent(OpenTTDEventType.GAME_IN_PROGRESS, Integer.valueOf(currentUpdate.getServerResponseInfo().getGameDate()[2]));
             }
         }
         OpenTTDEvent endgame = checkForEndGame(isSameGame);
@@ -279,7 +282,7 @@ public class ServerHandler {
                 evts.add(newcomers);
                 // If more than 1 has started someone is in the lead.
                 if (newbies.length > 1) {
-                    evts.add(new OpenTTDEvent(OpenTTDEvent.Type.NEW_LEADER, curList.get(0)));
+                    evts.add(new OpenTTDEvent(OpenTTDEventType.NEW_LEADER, curList.get(0)));
                 }
             }
         } else {
@@ -334,7 +337,7 @@ public class ServerHandler {
                 } else {
                     List<Client> newClients = currentUpdate.getServerDetailedInfo().getAllClients();
                     if (newClients.size() > 0) {
-                        evts.add(new OpenTTDEvent(OpenTTDEvent.Type.CLIENT_JOIN, (Object[]) newClients.toArray(new Client[newClients.size()])));
+                        evts.add(new OpenTTDEvent(OpenTTDEventType.CLIENT_JOIN, (Object[]) newClients.toArray(new Client[newClients.size()])));
                     }
                 }
             } catch (JOTLException otx) {
@@ -390,7 +393,7 @@ public class ServerHandler {
         if (isSameGame && (oldList.size() > newList.size())) {
             for (Company com : oldList) {
                 if (!newList.contains(com)) {
-                    evts.add(new OpenTTDEvent(OpenTTDEvent.Type.COMPANY_REMOVED, com));
+                    evts.add(new OpenTTDEvent(OpenTTDEventType.COMPANY_REMOVED, com));
                 }
             }
         }
@@ -408,7 +411,7 @@ public class ServerHandler {
         List<OpenTTDEvent> evts = new ArrayList<OpenTTDEvent>();
         for (Client client : oldList) {
             if (!client.isSpectator() && !newList.contains(client)) {
-                evts.add(new OpenTTDEvent(OpenTTDEvent.Type.CLIENT_LEFT, client));
+                evts.add(new OpenTTDEvent(OpenTTDEventType.CLIENT_LEFT, client));
             }
         }
         return evts;
@@ -430,7 +433,7 @@ public class ServerHandler {
                     printDebugMessage(client + " was already playing.");
                 } else {
                     printDebugMessage(client + " is new! Generating event.");
-                    evts.add(new OpenTTDEvent(OpenTTDEvent.Type.CLIENT_JOIN, client));
+                    evts.add(new OpenTTDEvent(OpenTTDEventType.CLIENT_JOIN, client));
                 }
             }
         }
@@ -455,7 +458,7 @@ public class ServerHandler {
                         printDebugMessage("Yes it has!");
                         paused = false;
                         unpauseCounter = 0;
-                        evt = new OpenTTDEvent(OpenTTDEvent.Type.UNPAUSED, Integer.valueOf(currentUpdate.getServerResponseInfo().getGameDate()[2]));
+                        evt = new OpenTTDEvent(OpenTTDEventType.UNPAUSED, Integer.valueOf(currentUpdate.getServerResponseInfo().getGameDate()[2]));
                     }
                 }
                 printDebugMessage("No it hasn't.");
@@ -467,7 +470,7 @@ public class ServerHandler {
                         printDebugMessage("Yes it has!");
                         paused = true;
                         pauseCounter = 1;
-                        evt = new OpenTTDEvent(OpenTTDEvent.Type.PAUSED, Integer.valueOf(currentUpdate.getServerResponseInfo().getGameDate()[2]));
+                        evt = new OpenTTDEvent(OpenTTDEventType.PAUSED, Integer.valueOf(currentUpdate.getServerResponseInfo().getGameDate()[2]));
                     }
                 } else {
                     printDebugMessage("No it hasn't.");
@@ -601,7 +604,7 @@ public class ServerHandler {
      * if it has.
      * @param sameGame      The games are not equal
      * @return              the {@link OpenTTDEvent} of type GAME_END or null
-     * @see OpenTTDEvent.Type
+     * @see OpenTTDEventType
      */
     private OpenTTDEvent checkForEndGame(boolean sameGame) {
         OpenTTDEvent evt = null;
@@ -609,7 +612,7 @@ public class ServerHandler {
         // The games are not equal or lastUpdate == null
         // So if lastUpdate IS NOT null that means a game ended.
         if (!sameGame && lastUpdate != null) {
-            evt = new OpenTTDEvent(OpenTTDEvent.Type.GAME_END, Integer.valueOf(lastUpdate.getServerResponseInfo().getGameDate()[2]));
+            evt = new OpenTTDEvent(OpenTTDEventType.GAME_END, Integer.valueOf(lastUpdate.getServerResponseInfo().getGameDate()[2]));
         }
         return evt;
     }
@@ -619,14 +622,14 @@ public class ServerHandler {
      * @param samegame          whether or not this {@link JOTLQuerier} has data from the same game as the previous one
      * @param currentUpdate     the current {@link JOTLQuerier}
      * @return                  an {@link OpenTTDEvent} of type GAME_START or null
-     * @see OpenTTDEvent.Type
+     * @see OpenTTDEventType
      */
     private OpenTTDEvent checkForNewGame(boolean samegame, JOTLQuerier currentUpdate) {
         // Check to find out whether a new game has started.
         OpenTTDEvent evt = null;
         if (!samegame) {
             // This means a new game has started! :)
-            evt = new OpenTTDEvent(OpenTTDEvent.Type.GAME_START, Integer.valueOf(currentUpdate.getServerResponseInfo().getStartDate()[2]));
+            evt = new OpenTTDEvent(OpenTTDEventType.GAME_START, Integer.valueOf(currentUpdate.getServerResponseInfo().getStartDate()[2]));
             // Let's reset some useful variables
             electricRail = false;
             monoRail = false;
@@ -646,7 +649,7 @@ public class ServerHandler {
         // A new game has been started. Has anyone started playing?
         OpenTTDEvent evt = null;
         if (curList.size() > 0) {
-            evt = new OpenTTDEvent(OpenTTDEvent.Type.COMPANY_NEW, (Object[]) curList.toArray(new Company[curList.size()]));
+            evt = new OpenTTDEvent(OpenTTDEventType.COMPANY_NEW, (Object[]) curList.toArray(new Company[curList.size()]));
             this.newbies = curList.toArray(new Company[curList.size()]);
         }
         return evt;
@@ -673,7 +676,7 @@ public class ServerHandler {
                 }
             }
             if (newcomers) {
-                evt = new OpenTTDEvent(OpenTTDEvent.Type.COMPANY_NEW, (Object[]) n00bs.toArray(new Company[n00bs.size()]));
+                evt = new OpenTTDEvent(OpenTTDEventType.COMPANY_NEW, (Object[]) n00bs.toArray(new Company[n00bs.size()]));
             }
         }
         return evt;
@@ -689,7 +692,7 @@ public class ServerHandler {
     private OpenTTDEvent checkForNewLeader(List<Company> lastList, List<Company> curList) {
         // Has a new leader climbed to the top?
         if (lastList.size() > 0 && curList.size() > 0 && (!lastList.get(0).equals(curList.get(0)))) {
-            return new OpenTTDEvent(OpenTTDEvent.Type.NEW_LEADER, curList.get(0));
+            return new OpenTTDEvent(OpenTTDEventType.NEW_LEADER, curList.get(0));
         }
         return null;
     }
@@ -707,13 +710,13 @@ public class ServerHandler {
         OpenTTDEvent evt = null;
         if (currentYear <= 2022) {
             if (currentYear == 2022 && !maglev) {
-                evt = new OpenTTDEvent(OpenTTDEvent.Type.MAGLEV_AVAILABLE);
+                evt = new OpenTTDEvent(OpenTTDEventType.MAGLEV_AVAILABLE);
                 maglev = true;
             } else if (currentYear == 1999 && !monoRail) {
-                evt = new OpenTTDEvent(OpenTTDEvent.Type.MONORAIL_AVAILABLE);
+                evt = new OpenTTDEvent(OpenTTDEventType.MONORAIL_AVAILABLE);
                 monoRail = true;
             } else if (currentYear == 1965 && !electricRail) {
-                evt = new OpenTTDEvent(OpenTTDEvent.Type.ELECTRIC_AVAILABLE);
+                evt = new OpenTTDEvent(OpenTTDEventType.ELECTRIC_AVAILABLE);
                 electricRail = true;
             }
         }

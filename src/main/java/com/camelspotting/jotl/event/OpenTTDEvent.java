@@ -14,7 +14,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package com.camelspotting.jotl;
+package com.camelspotting.jotl.event;
 
 import java.util.Arrays;
 
@@ -31,7 +31,7 @@ import java.util.Arrays;
 public class OpenTTDEvent {
 
     /** The type of event*/
-    private Type type;
+    private OpenTTDEventType type;
     /** Objects of interest */
     private Object[] objects;
 
@@ -39,11 +39,11 @@ public class OpenTTDEvent {
      * Constructor for making events.
      * @param t     the type of event
      */
-    OpenTTDEvent(Type t,Object... objects) {
+    public OpenTTDEvent(OpenTTDEventType t, Object... objects) {
         this.type = t;
         this.objects = objects;
     }
-    
+
     /**
      * Depending on what type of event this is this array contains different
      * objects.
@@ -72,72 +72,16 @@ public class OpenTTDEvent {
      * This method returns the type of event.
      * @return      the type
      */
-    public Type getType() {
+    public OpenTTDEventType getType() {
         return type;
     }
-    
+
     /**
      * This gives a description of this event.
      * @return      the description of the type and the list of appended objects
      */
     @Override
     public String toString() {
-        return new StringBuilder("OpenTTDEvent(").append(type.desc).append(") Objects: ").append(Arrays.toString(objects)).toString();
-    }
-
-    /**
-     * This enum represents the type of OpenTTD events.
-     * @author Mats Andreassen
-     * @version 1.0
-     */
-    public enum Type {
-        /** A game has ended */
-        GAME_END("Game end"),
-        /** A game has started */
-        GAME_START("Game start"),
-        /** A game is in progress*/
-        GAME_IN_PROGRESS("Game in progress"),
-        /** A new company now has the best rating */
-        NEW_LEADER("New leader"),
-        /** Electric rail has now become available */
-        ELECTRIC_AVAILABLE("Electric rail"),
-        /** Monorail has now become available */
-        MONORAIL_AVAILABLE("Monorail"),
-        /** Maglev has now become available */
-        MAGLEV_AVAILABLE("Maglev"),
-        /** A new company has been created */
-        COMPANY_NEW("New company"),
-        /** A company has been removed */
-        COMPANY_REMOVED("Company removed"),
-        /** The game has been paused */
-        PAUSED("Paused"),
-        /** The game has been unpaused */
-        UNPAUSED("Unpaused"),
-        /** A client has joined */
-        CLIENT_JOIN("Client joined"),
-        /** A client has left */
-        CLIENT_LEFT("Client left"),
-        /** Software has lost connection to server */
-        LOST_CONNECTION("Lost connection");
-
-        /** This is a description of the type */
-        private String desc;
-        
-        /**
-         * Constructor for enum.
-         * @param desc      a description for types
-         */
-        private Type(String desc) {
-            this.desc = desc;
-        }
-        
-        /**
-         * Returns a textual description of the enum.
-         * @return      the description
-         */
-        @Override
-        public String toString() {
-            return desc;
-        }
+        return new StringBuilder("OpenTTDEvent(").append(type.getDescription()).append(") Objects: ").append(Arrays.toString(objects)).toString();
     }
 }
