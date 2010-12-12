@@ -16,10 +16,13 @@
  */
 package com.camelspotting.jotl;
 
+import com.camelspotting.jotl.parsing.Station;
+import com.camelspotting.jotl.parsing.Vehicle;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * This class represents a company currently in the game.
@@ -45,9 +48,9 @@ public final class Company implements Comparable<Company> {
     /** The rating of a company */
     private int rating;
     /** The vehicle count */
-    private int[] vehicles;
+    private Map<Vehicle, Integer> vehicleCountMap;
     /** The station count */
-    private int[] stations;
+    private Map<Station, Integer> stationCountMap;
     /** Clients connected to this company */
     private ArrayList<Client> clients;
 
@@ -71,8 +74,8 @@ public final class Company implements Comparable<Company> {
         this.income = income;
         this.rating = performance;
         this.pwProtected = pwProtected;
-        this.vehicles = new int[ServerInfo.vehicles.length];
-        this.stations = new int[ServerInfo.stations.length];
+        this.vehicleCountMap = new EnumMap<Vehicle, Integer>(Vehicle.class);
+        this.stationCountMap = new EnumMap<Station, Integer>(Station.class);
     }
 
     /**
@@ -100,22 +103,21 @@ public final class Company implements Comparable<Company> {
 
     /**
      * Method for setting how many vehicles a company has.
-     * @param index     the index to modify
+     * @param vehicle   the vehicle to update
      * @param value     the value to set
-     * @see ServerInfo#vehicles
      */
-    void setNumberOfVehicles(int index, int value) {
-        vehicles[index] = value;
+    void setNumberOfVehicles(Vehicle vehicle, int value) {
+        vehicleCountMap.put(vehicle, value);
     }
 
     /**
      * Method for setting how many stations a company has.
-     * @param index     the index to modify
+     * @param station   the station to update
      * @param value     the value to set
      * @see ServerInfo#stations
      */
-    void setNumberOfStations(int index, int value) {
-        stations[index] = value;
+    void setNumberOfStations(Station station, int value) {
+        stationCountMap.put(station, value);
     }
 
     /**
@@ -126,10 +128,8 @@ public final class Company implements Comparable<Company> {
      * @return  the array containing the numbers
      * @see ServerInfo#vehicles
      */
-    public int[] getNumberOfVehicles() {
-        int[] A = new int[vehicles.length];
-        System.arraycopy(vehicles, 0, A, 0, vehicles.length);
-        return A;
+    public Map<Vehicle, Integer> getNumberOfVehicles() {
+        return new EnumMap<Vehicle, Integer>(vehicleCountMap);
     }
 
     /**
@@ -140,17 +140,15 @@ public final class Company implements Comparable<Company> {
      * @return  the array containing the numbers
      * @see ServerInfo#stations
      */
-    public int[] getNumberOfStations() {
-        int[] A = new int[stations.length];
-        System.arraycopy(stations, 0, A, 0, stations.length);
-        return A;
+    public Map<Station, Integer> getNumberOfStations() {
+        return new EnumMap<Station, Integer>(stationCountMap);
     }
 
     /**
      * Method for getting the current ID of a company
      * @return  the id
      */
-    public int getCurrentID() {
+    public int getCurrentId() {
         return currentId;
     }
 
@@ -276,11 +274,11 @@ public final class Company implements Comparable<Company> {
      */
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder("Company(").append(getCurrentID()).append("): rating: ");
+        StringBuilder sb = new StringBuilder("Company #").append(currentId).append(": rating: ");
         sb.append(rating).append(", name: ").append(companyName).append(", value: ").append(companyValue);
         sb.append(", income: ").append(income).append(", balance: ").append(balance).append(", inaugeration: ");
         sb.append(inaugerated).append(", pw protected: ").append(pwProtected ? "yes" : "no").append(", stations: ");
-        sb.append(Arrays.toString(stations)).append(", vehicles: ").append(Arrays.toString(vehicles)).append(".");
+        sb.append(stationCountMap.values()).append(", vehicles: ").append(vehicleCountMap.values()).append(".");
         return sb.toString();
     }
 
@@ -304,7 +302,7 @@ public final class Company implements Comparable<Company> {
     public boolean equals(Object o) {
         if (o instanceof Company) {
             Company c = (Company) o;
-            return currentId == c.getCurrentID() && c.getInaugerationYear() == getInaugerationYear();
+            return currentId == c.getCurrentId() && c.getInaugerationYear() == getInaugerationYear();
         } else {
             return false;
         }

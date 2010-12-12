@@ -16,6 +16,8 @@
  */
 package com.camelspotting.jotl;
 
+import com.camelspotting.jotl.parsing.Station;
+import com.camelspotting.jotl.parsing.Vehicle;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -90,23 +92,23 @@ public final class ServerInfo {
             i += 2;
             boolean passwordProtected = (data[i++] == 1);
 
-            LOG.debug("Creating Company " + compName + " inaugerated: " + inaugurated + " compValue: " + companyValue + " money: " + money + " income: " + income + " performance: " + performance + " pw: " + passwordProtected);
             Company com = new Company(current, compName, inaugurated, companyValue, money, income, performance, passwordProtected);
+            LOG.debug(String.format("Created %s.", com));
             companies.add(com);
 
             /* vehicle info */
-            for (int k = 0; k < vehicles.length; k++) {
-                com.setNumberOfVehicles(k, Parser.parse16BitNumber(data, i));
+            for (Vehicle v : Vehicle.values()) {
+                com.setNumberOfVehicles(v, Parser.parse16BitNumber(data, i));
                 i += 2;
             }
-            LOG.debug(com + " has " + Arrays.toString(com.getNumberOfVehicles()) + " vehicles.");
+            LOG.debug(com + " has " + com.getNumberOfVehicles() + " vehicles.");
 
             /* station info */
-            for (int k = 0; k < stations.length; k++) {
-                com.setNumberOfStations(k, Parser.parse16BitNumber(data, i));
+            for (Station s : Station.values()) {
+                com.setNumberOfStations(s, Parser.parse16BitNumber(data, i));
                 i += 2;
             }
-            LOG.debug(com + " has " + Arrays.toString(com.getNumberOfStations()) + " stations.");
+            LOG.debug(com + " has " + com.getNumberOfStations() + " stations.");
         }
     }
 
@@ -135,18 +137,18 @@ public final class ServerInfo {
             companies.add(com);
 
             /* vehicle info */
-            for (int k = 0; k < vehicles.length; k++) {
-                com.setNumberOfVehicles(k, Parser.parse16BitNumber(data, i));
+           for (Vehicle v : Vehicle.values()) {
+                com.setNumberOfVehicles(v, Parser.parse16BitNumber(data, i));
                 i += 2;
             }
-            LOG.debug(com + " has " + Arrays.toString(com.getNumberOfVehicles()) + " vehicles.");
+            LOG.debug(com + " has " + com.getNumberOfVehicles() + " vehicles.");
 
             /* station info */
-            for (int k = 0; k < stations.length; k++) {
-                com.setNumberOfStations(k, Parser.parse16BitNumber(data, i));
+            for (Station s : Station.values()) {
+                com.setNumberOfStations(s, Parser.parse16BitNumber(data, i));
                 i += 2;
             }
-            LOG.debug(com + " has " + Arrays.toString(com.getNumberOfStations()) + " stations.");
+            LOG.debug(com + " has " + com.getNumberOfStations() + " stations.");
 
             /* Get a list of clients connected to this company.
              * At this point we read a boolean value from the buffer, if > 0 there is another client
@@ -283,17 +285,9 @@ public final class ServerInfo {
             }
         } catch (JOTLException ex) {
             // This should not occur
-            }
+        }
         return sb.toString();
     }
-    /** The vehicle types */
-    public static String[] vehicles = new String[]{
-        "Train", "Truck", "Bus", "Aircraft", "Ship"
-    };
-    /** The station types */
-    public static String[] stations = new String[]{
-        "Train Station", "Truck Stop", "Bus Stop", "Airport", "Dock"
-    };
 
     /**
      * Getter for the UDP-packet version.
