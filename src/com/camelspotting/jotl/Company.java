@@ -71,8 +71,8 @@ public final class Company implements Comparable<Company> {
         this.income = income;
         this.rating = performance;
         this.pwProtected = pwProtected;
-        this.vehicles = new int[ServerDetailedInfo.vehicles.length];
-        this.stations = new int[ServerDetailedInfo.stations.length];
+        this.vehicles = new int[ServerInfo.vehicles.length];
+        this.stations = new int[ServerInfo.stations.length];
     }
 
     /**
@@ -102,7 +102,7 @@ public final class Company implements Comparable<Company> {
      * Method for setting how many vehicles a company has.
      * @param index     the index to modify
      * @param value     the value to set
-     * @see ServerDetailedInfo#vehicles
+     * @see ServerInfo#vehicles
      */
     void setNumberOfVehicles(int index, int value) {
         vehicles[index] = value;
@@ -112,7 +112,7 @@ public final class Company implements Comparable<Company> {
      * Method for setting how many stations a company has.
      * @param index     the index to modify
      * @param value     the value to set
-     * @see ServerDetailedInfo#stations
+     * @see ServerInfo#stations
      */
     void setNumberOfStations(int index, int value) {
         stations[index] = value;
@@ -121,10 +121,10 @@ public final class Company implements Comparable<Company> {
     /**
      * Method for accessing how many vehicles a company has.
      * Match the indices in this array with the 
-     * {@link ServerDetailedInfo#vehicles} array to find out
+     * {@link ServerInfo#vehicles} array to find out
      * what number is what kind of vehicle.
      * @return  the array containing the numbers
-     * @see ServerDetailedInfo#vehicles
+     * @see ServerInfo#vehicles
      */
     public int[] getNumberOfVehicles() {
         int[] A = new int[vehicles.length];
@@ -135,10 +135,10 @@ public final class Company implements Comparable<Company> {
     /**
      * Method for accessing how many stations a company has.
      * Match the indices in this array with the 
-     * {@link ServerDetailedInfo#stations} array to find out
+     * {@link ServerInfo#stations} array to find out
      * what number is what kind of stations.
      * @return  the array containing the numbers
-     * @see ServerDetailedInfo#stations
+     * @see ServerInfo#stations
      */
     public int[] getNumberOfStations() {
         int[] A = new int[stations.length];

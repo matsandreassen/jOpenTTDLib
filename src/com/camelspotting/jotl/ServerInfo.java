@@ -27,7 +27,7 @@ import java.util.List;
  * @version 1.0
  * @see SendablePacketType
  */
-public final class ServerDetailedInfo {
+public final class ServerInfo {
 
     /** All companies */
     private List<Company> companies;
@@ -41,7 +41,7 @@ public final class ServerDetailedInfo {
      * is contained within.
      * @param data      the buffer
      */
-    public ServerDetailedInfo(byte[] data) {
+    public ServerInfo(byte[] data) {
         this.companies = new ArrayList<Company>();
         this.allClients = new ArrayList<Client>();
         int i = 3;

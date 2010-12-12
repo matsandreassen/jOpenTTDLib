@@ -42,7 +42,7 @@ public enum RecievablePacketType {
 	private int value;
 
 	/**
-	 * Smple constructor.
+	 * Simple constructor.
 	 * @param value     the final byte for the packet
 	 */
 	private RecievablePacketType(int value) {

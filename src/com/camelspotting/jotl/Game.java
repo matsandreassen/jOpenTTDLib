@@ -28,37 +28,37 @@ public class Game {
     /** Incrementable ID to label games*/
     private static int id_inc = 0;
     /** One of the objects that will contain gathered information */
-    private ServerResponseInfo sri;
+    private ClientsInfo clientsInfo;
     /** One of the objects that will contain gathered information */
-    private ServerDetailedInfo sdi;
+    private ServerInfo serverInfo;
     /** Game ID */
     private int id;
 
     /**
      * This internal constructor is for creating these
      * archive objects.
-     * @param sri       the information to contain
-     * @param sdi       more information to contain
+     * @param clientsInfo       the information to contain
+     * @param serverInfo       more information to contain
      */
-    Game(ServerResponseInfo sri, ServerDetailedInfo sdi) {
+    Game(ClientsInfo sri, ServerInfo sdi) {
         this.id = ++Game.id_inc;
-        this.sri = sri;
-        this.sdi = sdi;
+        this.clientsInfo = sri;
+        this.serverInfo = sdi;
     }
     
     /**
-     * Getter for the {@link ServerResponseInfo} object.
-     * @return      the {@link ServerResponseInfo} object
+     * Getter for the {@link ClientsInfo} object.
+     * @return      the {@link ClientsInfo} object
      */
-    public ServerResponseInfo getServerResponseInfo() {
-        return sri;
+    public ClientsInfo getServeInfo() {
+        return clientsInfo;
     }
     
     /**
-     * Getter for the {@link ServerDetailedInfo} object.
-     * @return      the {@link ServerDetailedInfo} object
+     * Getter for the {@link ServerInfo} object.
+     * @return      the {@link ServerInfo} object
      */
-    public ServerDetailedInfo getServerDetailedInfo() {
-        return sdi;
+    public ServerInfo getClientsInfo() {
+        return serverInfo;
     }
 }

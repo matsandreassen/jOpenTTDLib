@@ -27,7 +27,7 @@ import java.util.Locale;
  * @version 1.0
  * @see SendablePacketType
  */
-public final class ServerResponseInfo {
+public final class ClientsInfo {
 
     /** The graphics requests*/
     private GRFRequest[] grfRequests;
@@ -71,7 +71,7 @@ public final class ServerResponseInfo {
      * is contained within.
      * @param data      the buffer
      */
-    ServerResponseInfo(byte[] data) {
+    ClientsInfo(byte[] data) {
         int i = 3;
         int version = data[i++];
         printParseMessage("Version 4 encountered.");

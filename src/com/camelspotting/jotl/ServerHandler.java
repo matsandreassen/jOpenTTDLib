@@ -232,7 +232,7 @@ public class ServerHandler {
      * happened since the last update.
      * @see OpenTTDEvent
      */
-    public synchronized void update() throws JOTLException {
+    public final synchronized void update() throws JOTLException {
         currentUpdate = new JOTLQuerier(monitoredHost, fromPort, destPort, true);
         checkForEvents();
     }
@@ -498,10 +498,10 @@ public class ServerHandler {
             return false;
         }
 
-        ServerResponseInfo sriOld = lastUpdate.getServerResponseInfo();
-        ServerResponseInfo sriNew = curUpdate.getServerResponseInfo();
-        ServerDetailedInfo sdiOld = lastUpdate.getServerDetailedInfo();
-        ServerDetailedInfo sdiNew = curUpdate.getServerDetailedInfo();
+        ClientsInfo sriOld = lastUpdate.getServerResponseInfo();
+        ClientsInfo sriNew = curUpdate.getServerResponseInfo();
+        ServerInfo sdiOld = lastUpdate.getServerDetailedInfo();
+        ServerInfo sdiNew = curUpdate.getServerDetailedInfo();
 
         // Check terrain type
         if (sriOld.getTileset() != sriNew.getTileset()) {
@@ -749,7 +749,7 @@ public class ServerHandler {
      * Method for registering listeners for any events.
      * @param otls       the listener to add
      */
-    public void addOpenTTDListeners(OpenTTDListener... otls) {
+    public final void addOpenTTDListeners(OpenTTDListener... otls) {
         if (listeners == null) {
             listeners = new ArrayList<OpenTTDListener>();
         }
@@ -763,7 +763,7 @@ public class ServerHandler {
      * Method for deregistering listeners.
      * @param otls   the listeners to remove
      */
-    public void removeOpenTTDListener(OpenTTDListener... otls) {
+    public final void removeOpenTTDListener(OpenTTDListener... otls) {
         if (listeners != null) {
             for (OpenTTDListener otl : otls) {
                 listeners.remove(otl);

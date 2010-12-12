@@ -21,8 +21,6 @@ package com.camelspotting.jotl;
 
 /**
  * All exceptions that happen in the code are wrapped inside OpenTTD-exceptions.
- * The messages are inherited from the real exceptions.
- * 
  * @author Mats Andressen
  * @version 1.0
  */
@@ -41,5 +39,14 @@ public final class JOTLException extends Exception {
      */
     public JOTLException() {
         super();
+    }
+
+    /**
+     * Main constructor for these exceptions.
+     * @param msg       the message to include.
+     * @param cause     the cause of this exception
+     */
+    public JOTLException(String msg, Throwable cause) {
+        super(msg, cause);
     }
 }
