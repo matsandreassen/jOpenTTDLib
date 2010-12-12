@@ -93,6 +93,10 @@ having to consult the OpenTTD code, more specifically in date.cpp.
 3) Changelog
 
 Changes:
+- (12th December 2010)
+	Made compatible with OpenTTD 1.0.5.
+	Ant build files swapped out with Maven pom.
+	Introduces dependency on slf4j and log4j.
 - (19th October 2008)
 	Made compatible with post 0.6.1 servers where data on clients
 	and spectator is omitted from the UDP responses.
