@@ -18,6 +18,8 @@ package com.camelspotting.jotl;
 
 import java.util.Arrays;
 import java.util.Locale;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class is for parsing and holding the information
@@ -29,6 +31,8 @@ import java.util.Locale;
  */
 public final class ClientsInfo {
 
+    /** The logger object for this class */
+    private static final Logger LOG = LoggerFactory.getLogger(ClientsInfo.class);
     /** The graphics requests*/
     private GRFRequest[] grfRequests;
     /** The server's name */
@@ -74,10 +78,10 @@ public final class ClientsInfo {
     ClientsInfo(byte[] data) {
         int i = 3;
         int version = data[i++];
-        printParseMessage("Version 4 encountered.");
+
         switch (version) {
             case 4:
-                printParseMessage("Processing version 4 data.");
+                LOG.info("Processing version 4 data.");
                 this.grfRequests = new GRFRequest[data[i++]];
                 for (int j = 0; j < grfRequests.length; j++) {
                     String id = Integer.toHexString(Parser.parse32BitNumber(data, i)).toUpperCase();
@@ -90,26 +94,26 @@ public final class ClientsInfo {
                     grfRequests[j] = new GRFRequest(id, md5);
                 }
             case 3:
-                printParseMessage("Processing version 3 data.");
+                LOG.info("Processing version 3 data.");
                 this.gameDate = Parser.parseDate(Parser.parse32BitNumber(data, i));
-                printParseMessage("Game date: " + Arrays.toString(gameDate));
+                LOG.debug("Game date: " + Arrays.toString(gameDate));
                 i += 4;
                 this.startDate = Parser.parseDate(Parser.parse32BitNumber(data, i));
-                printParseMessage("Start date: " + Arrays.toString(startDate));
+                LOG.debug("Start date: " + Arrays.toString(startDate));
                 i += 4;
             case 2:
-                printParseMessage("Processing version 2 data.");
+                LOG.info("Processing version 2 data.");
                 this.companies_max = data[i++];
                 this.companies_on = data[i++];
                 this.spectators_max = data[i++];
             case 1:
-                printParseMessage("Processing version 1 data.");
+                LOG.info("Processing version 1 data.");
                 int length = Parser.locateNextZero(data, i);
-                printParseMessage("Server name seems to be " + length + " characters long.");
+                LOG.debug("Server name seems to be " + length + " characters long.");
                 this.serverName = Parser.parseString(data, i, length).trim();
                 i += length + 1;
                 length = Parser.locateNextZero(data, i);
-                printParseMessage("Revision seems to be " + length + " characters long.");
+                LOG.debug("Revision seems to be " + length + " characters long.");
                 this.revision = Parser.parseVersion(Parser.parseString(data, i, length).trim());
                 i += length + 1;
                 this.serverLang = data[i++];
@@ -127,7 +131,7 @@ public final class ClientsInfo {
                 this.tileset = data[i++];
                 this.dedicated = (data[i++] == 1);
         }
-        printParseMessage("Done parsing.");
+        LOG.info("Done parsing.");
     }
 
     /**
@@ -135,6 +139,7 @@ public final class ClientsInfo {
      * @param data      the data buffer received
      */
     void parseGRFNames(byte[] data) {
+        LOG.debug("Parsing GRF names.");
         int i = 0;
         int oldCount = grfRequests.length;
         int newCount = Parser.parse8BitNumber(data, i++);
@@ -157,7 +162,7 @@ public final class ClientsInfo {
             i += length + 1;
             grfRequests[j] = new GRFRequest(id, md5, name);
         }
-        printParseMessage("Done parsing.");
+        LOG.debug("Done parsing GRF names.");
     }
 
     /**
@@ -373,15 +378,6 @@ public final class ClientsInfo {
      */
     public String getMapName() {
         return map_name;
-    }
-
-    /**
-     * Support message for printing parse related info
-     * in debug mode.
-     * @param msg       the message to print out
-     */
-    private void printParseMessage(String msg) {
-        Parser.printParseMessage("ServerResponseInfo", msg);
     }
 
     /**

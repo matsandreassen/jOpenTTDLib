@@ -289,6 +289,7 @@ public final class Company implements Comparable<Company> {
      * @param o     the {@link Company} to compare to
      * @return      the difference in performances
      */
+    @Override
     public int compareTo(Company o) {
         return o.getRating() - this.rating;
     }
@@ -307,5 +308,13 @@ public final class Company implements Comparable<Company> {
         } else {
             return false;
         }
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 3;
+        hash = 71 * hash + this.currentId;
+        hash = 71 * hash + this.inaugerated;
+        return hash;
     }
 }

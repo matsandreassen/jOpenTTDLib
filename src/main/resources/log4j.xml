@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+
+<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">
+    <appender name="console" class="org.apache.log4j.ConsoleAppender">
+        <param name="Target" value="System.out"/>
+        <param name="Threshold" value="ALL"/>
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="%-4r [%t] %-5p %c %x - %m%n"/>
+        </layout>
+    </appender>
+    <appender name="file" class="org.apache.log4j.FileAppender">
+        <param name="File" value="jotl.log"/>
+        <param name="Threshold" value="ALL"/>
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="%-4r [%t] %-5p %c %x - %m%n" />
+        </layout>
+    </appender>
+
+    <logger name="com.camelspotting">
+        <level value="TRACE"/>
+        <!--appender-ref ref="file" /-->
+    </logger>
+
+    <root>
+        <priority value ="DEBUG" />
+        <appender-ref ref="console" />
+    </root>
+
+</log4j:configuration>

@@ -16,6 +16,7 @@
  */
 package com.camelspotting.jotl;
 
+import java.util.Arrays;
 import java.util.Locale;
 
 /**
@@ -120,6 +121,7 @@ public final class Client implements Comparable<Client> {
      * @param c     the client to compare to
      * @return      Less than 0 if this client is 'less' than the other, 0 if they're equal, more than 1 if is 'more' than the other
      */
+    @Override
     public int compareTo(Client c) {
         return name.compareTo(c.getName());
     }
@@ -139,5 +141,13 @@ public final class Client implements Comparable<Client> {
         } else {
             return super.equals(o);
         }
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 37 * hash + (this.uniqueId != null ? this.uniqueId.hashCode() : 0);
+        hash = 37 * hash + Arrays.hashCode(this.joinDate);
+        return hash;
     }
 }

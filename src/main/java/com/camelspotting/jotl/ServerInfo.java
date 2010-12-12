@@ -20,6 +20,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class is for holding the servers detailed info.
@@ -29,6 +31,8 @@ import java.util.List;
  */
 public final class ServerInfo {
 
+    /** The logger object for this class */
+    private static final Logger LOG = LoggerFactory.getLogger(ClientsInfo.class);
     /** All companies */
     private List<Company> companies;
     /** All clients, both spectators and players */
@@ -49,6 +53,7 @@ public final class ServerInfo {
         int activePlayers = data[i++];
 
         switch (this.version) {
+            case 6:
             case 5:
                 parseVersion5(data, activePlayers, i);
                 break;
@@ -59,17 +64,18 @@ public final class ServerInfo {
                 parseVersion4(data, activePlayers, i);
                 break;
             default:
-                printParseMessage("Unknown version detected.");
+                LOG.info("Unknown version detected.");
                 break;
         }
-        printParseMessage("Done parsing.");
+        LOG.info("Done parsing.");
     }
 
     private void parseVersion5(byte[] data, int activePlayers, int i) {
+        LOG.info("Parsing version 5 info.");
         for (int j = 0; j < activePlayers; j++) {
             int current = data[i++];
             int length = Parser.locateNextZero(data, i);
-            printParseMessage("New company name seems to be " + length + " characters long.");
+            LOG.debug("New company name seems to be " + length + " characters long.");
             String compName = Parser.parseString(data, i, length);
             i += length + 1;
             int inaugurated = Parser.parse32BitNumber(data, i);
@@ -84,7 +90,7 @@ public final class ServerInfo {
             i += 2;
             boolean passwordProtected = (data[i++] == 1);
 
-            printParseMessage("Creating Company " + compName + " inaugerated: " + inaugurated + " compValue: " + companyValue + " money: " + money + " income: " + income + " performance: " + performance + " pw: " + passwordProtected);
+            LOG.debug("Creating Company " + compName + " inaugerated: " + inaugurated + " compValue: " + companyValue + " money: " + money + " income: " + income + " performance: " + performance + " pw: " + passwordProtected);
             Company com = new Company(current, compName, inaugurated, companyValue, money, income, performance, passwordProtected);
             companies.add(com);
 
@@ -93,22 +99,23 @@ public final class ServerInfo {
                 com.setNumberOfVehicles(k, Parser.parse16BitNumber(data, i));
                 i += 2;
             }
-            printParseMessage(com + " has " + Arrays.toString(com.getNumberOfVehicles()) + " vehicles.");
+            LOG.debug(com + " has " + Arrays.toString(com.getNumberOfVehicles()) + " vehicles.");
 
             /* station info */
             for (int k = 0; k < stations.length; k++) {
                 com.setNumberOfStations(k, Parser.parse16BitNumber(data, i));
                 i += 2;
             }
-            printParseMessage(com + " has " + Arrays.toString(com.getNumberOfStations()) + " stations.");
+            LOG.debug(com + " has " + Arrays.toString(com.getNumberOfStations()) + " stations.");
         }
     }
 
     private void parseVersion4(byte[] data, int activePlayers, int i) {
+        LOG.info("Parsing version 4 info.");
         for (int j = 0; j < activePlayers; j++) {
             int current = data[i++];
             int length = Parser.locateNextZero(data, i);
-            printParseMessage("New company name seems to be " + length + " characters long.");
+            LOG.debug("New company name seems to be " + length + " characters long.");
             String compName = Parser.parseString(data, i, length);
             i += length + 1;
             int inaugurated = Parser.parse32BitNumber(data, i);
@@ -123,7 +130,7 @@ public final class ServerInfo {
             i += 2;
             boolean passwordProtected = (data[i++] == 1);
 
-            printParseMessage("Creating Company " + compName + " inaugerated: " + inaugurated + " compValue: " + companyValue + " money: " + money + " income: " + income + " performance: " + performance + " pw: " + passwordProtected);
+            LOG.debug("Creating Company " + compName + " inaugerated: " + inaugurated + " compValue: " + companyValue + " money: " + money + " income: " + income + " performance: " + performance + " pw: " + passwordProtected);
             Company com = new Company(current, compName, inaugurated, companyValue, money, income, performance, passwordProtected);
             companies.add(com);
 
@@ -132,14 +139,14 @@ public final class ServerInfo {
                 com.setNumberOfVehicles(k, Parser.parse16BitNumber(data, i));
                 i += 2;
             }
-            printParseMessage(com + " has " + Arrays.toString(com.getNumberOfVehicles()) + " vehicles.");
+            LOG.debug(com + " has " + Arrays.toString(com.getNumberOfVehicles()) + " vehicles.");
 
             /* station info */
             for (int k = 0; k < stations.length; k++) {
                 com.setNumberOfStations(k, Parser.parse16BitNumber(data, i));
                 i += 2;
             }
-            printParseMessage(com + " has " + Arrays.toString(com.getNumberOfStations()) + " stations.");
+            LOG.debug(com + " has " + Arrays.toString(com.getNumberOfStations()) + " stations.");
 
             /* Get a list of clients connected to this company.
              * At this point we read a boolean value from the buffer, if > 0 there is another client
@@ -156,8 +163,8 @@ public final class ServerInfo {
                 i += 4;
 
                 Client client = new Client(cName, uniqueId, joinDate, false, com);
-                printParseMessage("Found client '" + client + "' connected to company '" + com + "'.");
-                printParseMessage("Creating new client: " + cName + " " + uniqueId + " " + Arrays.toString(joinDate));
+                LOG.debug("Found client '" + client + "' connected to company '" + com + "'.");
+                LOG.debug("Creating new client: " + cName + " " + uniqueId + " " + Arrays.toString(joinDate));
                 com.addClient(client);
                 allClients.add(client);
             }
@@ -169,7 +176,7 @@ public final class ServerInfo {
             String cName = Parser.parseString(data, i, length);
             // If this is the unreal spectator that is always present on the server.
             if (cName.equals("")) {
-                printParseMessage("Ignoring unreal spectator.");
+                LOG.debug("Ignoring unreal spectator.");
                 continue;
             }
             i += length + 1;
@@ -179,9 +186,9 @@ public final class ServerInfo {
             int[] joinDate = Parser.parseDate(Parser.parse32BitNumber(data, i));
             i += 4;
 
-            printParseMessage("Creating new spectator: " + cName + " " + uniqueId + " " + Arrays.toString(joinDate));
+            LOG.debug("Creating new spectator: " + cName + " " + uniqueId + " " + Arrays.toString(joinDate));
             Client client = new Client(cName, uniqueId, joinDate, true, null);
-            printParseMessage("Found spectator '" + client + "'.");
+            LOG.debug("Found spectator '" + client + "'.");
             allClients.add(client);
         }
     }
@@ -244,14 +251,6 @@ public final class ServerInfo {
     public List<Company> getCompanies() {
         Collections.sort(companies);
         return Collections.unmodifiableList(companies);
-    }
-
-    /**
-     * Internal support method for printing out debug messages.
-     * @param msg       the method to print out
-     */
-    private void printParseMessage(String msg) {
-        Parser.printParseMessage("ServerDetailedInfo", msg);
     }
 
     /**

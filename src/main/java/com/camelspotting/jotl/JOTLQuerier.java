@@ -26,6 +26,8 @@ import java.net.UnknownHostException;
 import java.util.Arrays;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This is one of the primary access points for any user of the library. 
@@ -43,6 +45,8 @@ import javax.swing.JOptionPane;
  */
 public final class JOTLQuerier implements Comparable<JOTLQuerier> {
 
+    /** The logger object for this class */
+    private static final Logger LOG = LoggerFactory.getLogger(JOTLQuerier.class);
     /** Maximum packet size for receiving */
     private static int maxPacketSize = 1000;
     /** This is the server address */
@@ -80,23 +84,21 @@ public final class JOTLQuerier implements Comparable<JOTLQuerier> {
         try {
             socket = new DatagramSocket(localPort);
             socket.setSoTimeout(timeout);
-            printSystemMessage("Pinging OpenTTD server at " + addr.getHostAddress());
+            LOG.info("Pinging OpenTTD server at " + addr.getHostAddress());
             socket.send(SendablePacketType.CLIENT_FIND_SERVER.createPacket(addr, destPort));
             DatagramPacket dp = new DatagramPacket(new byte[maxPacketSize], maxPacketSize);
             socket.receive(dp);
-            printSystemMessage("We got a reply! There is most definetly something there.");
+            LOG.info("We got a reply! There is most definitely something there.");
             return trimPacket(dp.getData(), dp.getLength());
         } catch (BindException bex) {
-            //bex.printStackTrace();
-            printSystemMessage("This local port '" + localPort + "' was already in use.");
+            LOG.info("This local port '" + localPort + "' was already in use.");
             return null;
         } catch (SocketException sex) {
-            //sex.printStackTrace();
-            printSystemMessage("We timed out. Couldn't locate any OpenTTD server here.");
+            LOG.info("We timed out. Couldn't locate any OpenTTD server here.");
             return null;
         } catch (IOException ioe) {
             //ioe.printStackTrace();
-            printSystemMessage("We could not even try to reach the server. What's wrong?");
+            LOG.info("We could not even try to reach the server. What's wrong?", ioe);
             return null;
         } finally {
             if (socket != null) {
@@ -145,10 +147,9 @@ public final class JOTLQuerier implements Comparable<JOTLQuerier> {
                 queryRest(SendablePacketType.CLIENT_FIND_SERVER);
             }
         } catch (UnknownHostException ex) {
-            throw new JOTLException(ex.getMessage());
+            throw new JOTLException("The host could not be reached.", ex);
         } catch (IOException ioe) {
-            ioe.printStackTrace();
-            // This shouldn't be thrown here.
+            throw new JOTLException("IO exception when trying to reach the server..", ioe);
         }
     }
 
@@ -233,6 +234,7 @@ public final class JOTLQuerier implements Comparable<JOTLQuerier> {
      * @throws com.camelspotting.openttd.JOTLException
      */
     public void query(SendablePacketType pt) throws JOTLException {
+        LOG.trace(String.format("query(packet=%s)", pt));
         if (!writable) {
             throw new JOTLException("The program has disallowed this operation at this point.");
         }
@@ -253,13 +255,17 @@ public final class JOTLQuerier implements Comparable<JOTLQuerier> {
             querypacket = pt.createPacket(address, destPort);
             //}
             socket.send(querypacket);
-            printSystemMessage("Packet of type " + pt.toString() + " sent.");
+            LOG.debug("Packet of type " + pt.toString() + " sent.");
             recieve(null);
         } catch (IOException ioe) {
             boolean closed = false;
             if (socket != null) {
-                socket.close();
-                closed = true;
+                try {
+                    socket.close();
+                    closed = true;
+                } catch (Exception ex) {
+                    LOG.error("Could not close socket.", ex);
+                }
             }
             throw new JOTLException(ioe.getMessage() + (closed ? " Action taken: Socket closed." : ""));
         }
@@ -291,23 +297,23 @@ public final class JOTLQuerier implements Comparable<JOTLQuerier> {
         sb.append("\n\tOpenTTD UDP-query Version: ").append(data[3]);
         sb.append("\n\tMessage length: ").append(data.length).append(".");
         sb.append("\n\tMessage: ").append(Arrays.toString(data));
-        printSystemMessage(sb.toString());
+        LOG.debug(sb.toString());
 
         switch (type) {
             case SERVER_RESPONSE:
-                printSystemMessage("Parsing server response information.");
+                LOG.info("Parsing server response information.");
                 this.serverResponseInfo = new ClientsInfo(data);
-                printSystemMessage("Server response information parsed.");
+                LOG.info("Server response information parsed.");
                 break;
             case SERVER_DETAIL_INFO:
-                printSystemMessage("Parsing server detailed information.");
+                LOG.info("Parsing server detailed information.");
                 this.serverDetailedInfo = new ServerInfo(data);
-                printSystemMessage("Server detailed information parsed.");
+                LOG.info("Server detailed information parsed.");
                 break;
             case SERVER_NEWGRFS:
-                printSystemMessage("Parsing newGRFs information.");
+                LOG.info("Parsing newGRFs information.");
                 serverResponseInfo.parseGRFNames(data);
-                printSystemMessage("NewGRFs information parsed.");
+                LOG.info("NewGRFs information parsed.");
                 break;
         }
     }
@@ -361,17 +367,6 @@ public final class JOTLQuerier implements Comparable<JOTLQuerier> {
     }
 
     /**
-     * Internal debug message outputter. Just writes
-     * to stdout.
-     * @param msg   the message to print out
-     */
-    static void printSystemMessage(String msg) {
-        if (debug) {
-            System.out.println("Querier: " + msg);
-        }
-    }
-
-    /**
      * This method compares when the objects were instantiated.
      * @param o     the object to compare with
      * @return      1 if this is newer, -1 if this is older, or 0 if equal
@@ -410,6 +405,7 @@ public final class JOTLQuerier implements Comparable<JOTLQuerier> {
     }
 
     private static void printUsage() {
+        LOG.debug("Showing cli usage.");
         println("Arguments: server:port");
         println("-----------------------");
         println("Failure to supply port will cause program to try default port of 3389.");
@@ -431,11 +427,13 @@ public final class JOTLQuerier implements Comparable<JOTLQuerier> {
                 try {
                     port = new Integer(A[1]);
                 } catch (NumberFormatException ex) {
-                    println("Syntax error. Port must be number. Defaulting to " + port + ".");
+                    String msg = String.format("Syntax error. Port must be number. Defaulting to %d.", port);
+                    LOG.debug(msg);
+                    println(msg);
                 }
             }
             try {
-                println("Querying server '" + server + "' at port " + port + ".");
+                LOG.info(String.format("Querying server '%s' at port %d.", server, port));
                 JOTLQuerier q = new JOTLQuerier(server);
                 System.out.println(q);
             } catch (JOTLException ex) {

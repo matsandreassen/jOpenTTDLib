@@ -22,6 +22,8 @@ import java.text.DateFormatSymbols;
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.regex.Pattern;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This is a class of static parse support methods, so no methods are visible to
@@ -32,6 +34,8 @@ import java.util.regex.Pattern;
  */
 public final class Parser {
 
+    /** The logger object for this class */
+    private static final Logger LOG = LoggerFactory.getLogger(Parser.class);
     /** The pattern for matching an IPv4 address. */
     private static String ipv4Pattern = "[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}";
     /** OpenTTD doesn't support ipv6 yet */
@@ -142,7 +146,7 @@ public final class Parser {
         i += (data[5] << 40);
         i += (data[6] << 48);
         i += (data[7] << 56);
-        printParseMessage("Parsing ", "64 bit " + Arrays.toString(data) + " ==> " + i);
+        LOG.debug("64 bit " + Arrays.toString(data) + " ==> " + i);
         return i;
     }
 
@@ -159,7 +163,7 @@ public final class Parser {
         i += (data[1] << 8);
         i += (data[2] << 16);
         i += (data[3] << 24);
-        printParseMessage("Parser", "32 bit " + Arrays.toString(data) + " ==> " + i);
+        LOG.debug("32 bit " + Arrays.toString(data) + " ==> " + i);
         return i;
     }
     
@@ -174,7 +178,7 @@ public final class Parser {
         int[] data = getUnsigned16BitValues(input, offset);
         i = data[0];
         i += (data[1] << 8);
-        printParseMessage("Parser", "16 bit " + Arrays.toString(data) + " ==> " + i);
+        LOG.debug("16 bit " + Arrays.toString(data) + " ==> " + i);
         return i;
     }
 
@@ -273,7 +277,7 @@ public final class Parser {
         int month = (x >> 5);
         int day = (x & 0x1F);
         int[] A = new int[]{day, month, year};
-        printParseMessage("Parser", "date(" + date + ") ==> " + Arrays.toString(A));
+        LOG.debug("date(" + date + ") ==> " + Arrays.toString(A));
         return A;
     }
 
@@ -302,7 +306,7 @@ public final class Parser {
         addr = parseIPv6(host);
         } */ else { // Try to resolve through DNS
             addr = InetAddress.getByName(host);
-            printParseMessage("Parser", host + " was resolved to " + addr.getHostAddress());
+            LOG.debug(host + " was resolved to " + addr.getHostAddress());
         }
         return addr;
     }
@@ -319,7 +323,7 @@ public final class Parser {
         for (int i = 0; i < S.length; i++) {
             A[i] = (byte) (int) Integer.valueOf(S[i]);
         }
-        printParseMessage("Parser", "Parsed ipv4 to: " + Arrays.toString(A));
+        LOG.debug("Parsed ipv4 to: " + Arrays.toString(A));
         return InetAddress.getByAddress(new byte[]{A[0], A[1], A[2], A[3]});
     }
 
@@ -334,17 +338,6 @@ public final class Parser {
     private static InetAddress parseIPV6(String host) throws UnknownHostException {
         // Feature not yet implemented.
         return null;
-    }
-
-    /**
-     * Internal debug method for printing parsing related information.
-     * @param src       where the message comes from
-     * @param msg       the message to print to sdtout
-     */
-    static void printParseMessage(String src, String msg) {
-        if (JOTLQuerier.debug) {
-            System.out.println(src + ": " + msg);
-        }
     }
 
     /**
