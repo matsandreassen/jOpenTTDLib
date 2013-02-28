@@ -20,33 +20,46 @@ import java.util.Arrays;
 import java.util.Locale;
 
 /**
- * This class represents a connected client,
- * both player and spectator.
+ * This class represents a connected client, both player and spectator.
+ *
  * @author Mats Andreassen
  * @version 1.0
  */
-public final class Client implements Comparable<Client> {
+public final class Client implements Comparable<Client>
+{
 
-    /** The name of the client */
+    /**
+     * The name of the client
+     */
     private String name;
-    /** A non-spectating client must be connected to a company */
+    /**
+     * A non-spectating client must be connected to a company
+     */
     private Company comp;
-    /** A unique ID identifying the client */
+    /**
+     * A unique ID identifying the client
+     */
     private String uniqueId;
-    /** What date this client joined the game */
+    /**
+     * What date this client joined the game
+     */
     private int[] joinDate;
-    /** Whether or not the client is a spectator */
+    /**
+     * Whether or not the client is a spectator
+     */
     private boolean spectator;
 
     /**
      * Constructor for clients.
-     * @param name          the name of the client
-     * @param uniqueId      a unique ID identifying the client
-     * @param joinDate      what date this client joined the game
-     * @param spectator     whether or not the client is a spectator
-     * @param com           the company the client is connected to
+     *
+     * @param name the name of the client
+     * @param uniqueId a unique ID identifying the client
+     * @param joinDate what date this client joined the game
+     * @param spectator whether or not the client is a spectator
+     * @param com the company the client is connected to
      */
-    Client(String name, String uniqueId, int[] joinDate, boolean spectator, Company com) {
+    Client( String name, String uniqueId, int[] joinDate, boolean spectator, Company com )
+    {
         this.name = name;
         this.uniqueId = uniqueId;
         this.joinDate = joinDate;
@@ -57,97 +70,123 @@ public final class Client implements Comparable<Client> {
     /**
      * This method is for getting the {@link Company} that the client is
      * connected to.
-     * @return      the company or null if the client is spectating
+     *
+     * @return the company or null if the client is spectating
      */
-    public Company getCompany() {
-        if (!spectator) {
+    public Company getCompany()
+    {
+        if ( !spectator )
+        {
             return comp;
-        } else {
+        }
+        else
+        {
             return null;
         }
     }
 
     /**
      * Getter for a clients name.
-     * @return  the name
+     *
+     * @return the name
      */
-    public String getName() {
+    public String getName()
+    {
         return name;
     }
 
     /**
      * Getter for a clients unique id.
-     * @return  the id
+     *
+     * @return the id
      */
-    public String getUniqueId() {
+    public String getUniqueId()
+    {
         return uniqueId;
     }
 
     /**
      * Getter for a clients join date in long format.
-     * @return  the join date
+     *
+     * @return the join date
      */
-    public String getLongJoinDate() {
-        return Parser.getLongDate(joinDate, Locale.UK);
+    public String getLongJoinDate()
+    {
+        return Parser.getLongDate( joinDate, Locale.UK );
     }
 
     /**
      * Getter for a clients join date in short format.
-     * @return  the join date
+     *
+     * @return the join date
      */
-    public String getShortJoinDate() {
-        return Parser.getShortDate(joinDate, Locale.UK);
+    public String getShortJoinDate()
+    {
+        return Parser.getShortDate( joinDate, Locale.UK );
     }
 
     /**
      * Getter for a clients spectator status.
-     * @return  false if the client is playing and true otherwise
+     *
+     * @return false if the client is playing and true otherwise
      */
-    public boolean isSpectator() {
+    public boolean isSpectator()
+    {
         return spectator;
     }
 
     /**
      * Convenience method for printing out the information of this client.
-     * @return      the information
+     *
+     * @return the information
      */
     @Override
-    public String toString() {
-        return new StringBuilder(isSpectator() ? "Spectator" : "Client").append(": name, ").append(getName()).append(", join date: ").append(getLongJoinDate()).toString();
+    public String toString()
+    {
+        return new StringBuilder( isSpectator() ? "Spectator" : "Client" ).append( ": name, " ).append( getName() ).append( ", join date: " ).append( getLongJoinDate() ).toString();
     }
 
     /**
      * This method makes the clients comparable based on their names.
-     * @param c     the client to compare to
-     * @return      Less than 0 if this client is 'less' than the other, 0 if they're equal, more than 1 if is 'more' than the other
+     *
+     * @param c the client to compare to
+     * @return Less than 0 if this client is 'less' than the other, 0 if they're
+     * equal, more than 1 if is 'more' than the other
      */
     @Override
-    public int compareTo(Client c) {
-        return name.compareTo(c.getName());
+    public int compareTo( Client c )
+    {
+        return name.compareTo( c.getName() );
     }
 
     /**
-     * This method will return whether or not this {@link Client} is equal to another
-     * object by comparing their unique id's if the other object is also a Client.
-     * If it is not a client, it reverts to default behaviour.
-     * @param o     the object to compare this with
-     * @return      whether or not this {@link Client} is equal to another object
+     * This method will return whether or not this {@link Client} is equal to
+     * another object by comparing their unique id's if the other object is also
+     * a Client. If it is not a client, it reverts to default behaviour.
+     *
+     * @param o the object to compare this with
+     * @return whether or not this {@link Client} is equal to another object
      */
     @Override
-    public boolean equals(Object o) {
-        if (o instanceof Client) {
+    public boolean equals( Object o )
+    {
+        if ( o instanceof Client )
+        {
             Client c = (Client) o;
-            return uniqueId.equals(c.getUniqueId());
-        } else {
-            return super.equals(o);
+            return uniqueId.equals( c.getUniqueId() );
+        }
+        else
+        {
+            return super.equals( o );
         }
     }
 
     @Override
-    public int hashCode() {
+    public int hashCode()
+    {
         int hash = 7;
-        hash = 37 * hash + (this.uniqueId != null ? this.uniqueId.hashCode() : 0);
-        hash = 37 * hash + Arrays.hashCode(this.joinDate);
+        hash = 37 * hash + ( this.uniqueId != null ? this.uniqueId.hashCode() : 0 );
+        hash = 37 * hash + Arrays.hashCode( this.joinDate );
         return hash;
     }
 }

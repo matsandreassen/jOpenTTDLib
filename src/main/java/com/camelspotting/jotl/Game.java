@@ -17,48 +17,64 @@
 package com.camelspotting.jotl;
 
 /**
- * This method is is just a wrapper for response and detail information, and
- * is primarily used for archiving the final query result for games in {@link ServerHandler}.
+ * This method is is just a wrapper for response and detail information, and is
+ * primarily used for archiving the final query result for games in
+ * {@link ServerHandler}.
+ *
  * @author Mats Andreassen
  * @version 1.0
  * @see ServerHandler
  */
-public class Game {
+public class Game
+{
 
-    /** Incrementable ID to label games*/
+    /**
+     * Incrementable ID to label games
+     */
     private static int id_inc = 0;
-    /** One of the objects that will contain gathered information */
+    /**
+     * One of the objects that will contain gathered information
+     */
     private ClientsInfo clientsInfo;
-    /** One of the objects that will contain gathered information */
+    /**
+     * One of the objects that will contain gathered information
+     */
     private ServerInfo serverInfo;
-    /** Game ID */
+    /**
+     * Game ID
+     */
     private int id;
 
     /**
-     * This internal constructor is for creating these
-     * archive objects.
-     * @param clientsInfo       the information to contain
-     * @param serverInfo       more information to contain
+     * This internal constructor is for creating these archive objects.
+     *
+     * @param clientsInfo the information to contain
+     * @param serverInfo more information to contain
      */
-    Game(ClientsInfo sri, ServerInfo sdi) {
+    Game( ClientsInfo sri, ServerInfo sdi )
+    {
         this.id = ++Game.id_inc;
         this.clientsInfo = sri;
         this.serverInfo = sdi;
     }
-    
+
     /**
      * Getter for the {@link ClientsInfo} object.
-     * @return      the {@link ClientsInfo} object
+     *
+     * @return the {@link ClientsInfo} object
      */
-    public ClientsInfo getServeInfo() {
+    public ClientsInfo getServeInfo()
+    {
         return clientsInfo;
     }
-    
+
     /**
      * Getter for the {@link ServerInfo} object.
-     * @return      the {@link ServerInfo} object
+     *
+     * @return the {@link ServerInfo} object
      */
-    public ServerInfo getClientsInfo() {
+    public ServerInfo getClientsInfo()
+    {
         return serverInfo;
     }
 }

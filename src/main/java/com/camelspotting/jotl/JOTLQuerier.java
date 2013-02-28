@@ -30,199 +30,267 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This is one of the primary access points for any user of the library. 
- * For each server you want to gather
- * information from an object of this class must be instantiated.
- * It supports both DNS and IPv4-addresses. If you use any of the constructors
- * that have the option of not querying the server immidiately the query-metods
- * may be used to gather information post-constructing the object.
- * 
+ * This is one of the primary access points for any user of the library. For
+ * each server you want to gather information from an object of this class must
+ * be instantiated. It supports both DNS and IPv4-addresses. If you use any of
+ * the constructors that have the option of not querying the server immidiately
+ * the query-metods may be used to gather information post-constructing the
+ * object.
+ *
  * @author Eivind Brandth Smedseng
  * @author Mats Andreassen
  * @version 1.0
  * @see #query(SendablePacketType pt)
  * @see #queryAll()
  */
-public final class JOTLQuerier implements Comparable<JOTLQuerier> {
+public final class JOTLQuerier implements Comparable<JOTLQuerier>
+{
 
-    /** The logger object for this class */
-    private static final Logger LOG = LoggerFactory.getLogger(JOTLQuerier.class);
-    /** Maximum packet size for receiving */
+    /**
+     * The logger object for this class
+     */
+    private static final Logger LOG = LoggerFactory.getLogger( JOTLQuerier.class );
+    /**
+     * Maximum packet size for receiving
+     */
     private static int maxPacketSize = 1000;
-    /** This is the server address */
+    /**
+     * This is the server address
+     */
     private InetAddress address;
-    /** The local port */
+    /**
+     * The local port
+     */
     private int fromPort;
-    /** The remote port */
+    /**
+     * The remote port
+     */
     private int destPort;
-    /** The socket to send and receive messages with */
+    /**
+     * The socket to send and receive messages with
+     */
     private DatagramSocket socket;
-    /** One of the objects that will contain gathered information */
+    /**
+     * One of the objects that will contain gathered information
+     */
     private ClientsInfo serverResponseInfo;
-    /** One of the objects that will contain gathered information */
+    /**
+     * One of the objects that will contain gathered information
+     */
     private ServerInfo serverDetailedInfo;
-    /** Whether or not to print debug messages. */
+    /**
+     * Whether or not to print debug messages.
+     */
     public static boolean debug = false;
-    /** boolean for hindering data of being overwritten */
+    /**
+     * boolean for hindering data of being overwritten
+     */
     private boolean writable = true;
-    /** When was this class instantiated? */
+    /**
+     * When was this class instantiated?
+     */
     private long timeStamp;
 
     /**
-     * This is a method for checking whether there is a server listening
-     * at this address and at the remote port.
-     * @param addr          the address to look up
-     * @param localPort     the local port to use
-     * @param destPort      the remote port to use
-     * @param timeout       number of milliseconds to wait for reply
-     * @return              the byte[] array containing the data for the CLIENT_FIND_SERVER-packet
+     * This is a method for checking whether there is a server listening at this
+     * address and at the remote port.
+     *
+     * @param addr the address to look up
+     * @param localPort the local port to use
+     * @param destPort the remote port to use
+     * @param timeout number of milliseconds to wait for reply
+     * @return the byte[] array containing the data for the
+     * CLIENT_FIND_SERVER-packet
      * @see SendablePacketType
      */
-    static byte[] testConfiguration(InetAddress addr, int localPort, int destPort, int timeout) {
+    static byte[] testConfiguration( InetAddress addr, int localPort, int destPort, int timeout )
+    {
         // Send a test packet to see if there is an OpenTTD-server at location
         DatagramSocket socket = null;
-        try {
-            socket = new DatagramSocket(localPort);
-            socket.setSoTimeout(timeout);
-            LOG.info("Pinging OpenTTD server at " + addr.getHostAddress());
-            socket.send(SendablePacketType.CLIENT_FIND_SERVER.createPacket(addr, destPort));
-            DatagramPacket dp = new DatagramPacket(new byte[maxPacketSize], maxPacketSize);
-            socket.receive(dp);
-            LOG.info("We got a reply! There is most definitely something there.");
-            return trimPacket(dp.getData(), dp.getLength());
-        } catch (BindException bex) {
-            LOG.info("This local port '" + localPort + "' was already in use.");
+        try
+        {
+            socket = new DatagramSocket( localPort );
+            socket.setSoTimeout( timeout );
+            LOG.info( "Pinging OpenTTD server at " + addr.getHostAddress() );
+            socket.send( SendablePacketType.CLIENT_FIND_SERVER.createPacket( addr, destPort ) );
+            DatagramPacket dp = new DatagramPacket( new byte[ maxPacketSize ], maxPacketSize );
+            socket.receive( dp );
+            LOG.info( "We got a reply! There is most definitely something there." );
+            return trimPacket( dp.getData(), dp.getLength() );
+        }
+        catch ( BindException bex )
+        {
+            LOG.info( "This local port '" + localPort + "' was already in use." );
             return null;
-        } catch (SocketException sex) {
-            LOG.info("We timed out. Couldn't locate any OpenTTD server here.");
+        }
+        catch ( SocketException sex )
+        {
+            LOG.info( "We timed out. Couldn't locate any OpenTTD server here." );
             return null;
-        } catch (IOException ioe) {
+        }
+        catch ( IOException ioe )
+        {
             //ioe.printStackTrace();
-            LOG.info("We could not even try to reach the server. What's wrong?", ioe);
+            LOG.info( "We could not even try to reach the server. What's wrong?", ioe );
             return null;
-        } finally {
-            if (socket != null) {
+        }
+        finally
+        {
+            if ( socket != null )
+            {
                 socket.close();
             }
         }
     }
 
     /**
-     * This is a convience constructor only accessible inside the package
-     * to facilitate easier use from ServerHandler.
-     * @param host      the hostname (openttd.someserver.com) or IPv4 to contact (ex: 127.0.0.1)
-     * @param fromPort  the port to use
-     * @param destPort  the port to contact
+     * This is a convience constructor only accessible inside the package to
+     * facilitate easier use from ServerHandler.
+     *
+     * @param host the hostname (openttd.someserver.com) or IPv4 to contact (ex:
+     * 127.0.0.1)
+     * @param fromPort the port to use
+     * @param destPort the port to contact
      * @param queryInfo whether to query server immidiately
      * @see ServerHandler
      */
-    JOTLQuerier(InetAddress addr, int fromPort, int destPort, boolean queryInfo) throws JOTLException {
+    JOTLQuerier( InetAddress addr, int fromPort, int destPort, boolean queryInfo ) throws JOTLException
+    {
         this.timeStamp = System.currentTimeMillis();
         this.address = addr;
         this.fromPort = fromPort;
         this.destPort = destPort;
-        if (queryInfo) {
+        if ( queryInfo )
+        {
             queryAll();
         }
     }
 
     /**
      * Main constructor for class.
-     * @param host      the hostname (openttd.someserver.com) or IPv4 to contact (ex: 127.0.0.1)
-     * @param fromPort  the port to use
-     * @param destPort  the port to contact
+     *
+     * @param host the hostname (openttd.someserver.com) or IPv4 to contact (ex:
+     * 127.0.0.1)
+     * @param fromPort the port to use
+     * @param destPort the port to contact
      * @param queryInfo whether to query server immidiately
      * @throws com.camelspotting.openttd.JOTLException
      */
-    public JOTLQuerier(String host, int fromPort, int destPort, boolean queryInfo) throws JOTLException {
+    public JOTLQuerier( String host, int fromPort, int destPort, boolean queryInfo ) throws JOTLException
+    {
         this.fromPort = fromPort;
         this.destPort = destPort;
-        try {
-            this.address = Parser.parseHost(host);
-            byte[] data = testConfiguration(address, fromPort, destPort, 2000);
-            if (data == null) {
-                throw new JOTLException("No server replies on this address and port.");
-            } else if (queryInfo) {
-                recieve(data);
-                queryRest(SendablePacketType.CLIENT_FIND_SERVER);
+        try
+        {
+            this.address = Parser.parseHost( host );
+            byte[] data = testConfiguration( address, fromPort, destPort, 2000 );
+            if ( data == null )
+            {
+                throw new JOTLException( "No server replies on this address and port." );
             }
-        } catch (UnknownHostException ex) {
-            throw new JOTLException("The host could not be reached.", ex);
-        } catch (IOException ioe) {
-            throw new JOTLException("IO exception when trying to reach the server..", ioe);
+            else if ( queryInfo )
+            {
+                recieve( data );
+                queryRest( SendablePacketType.CLIENT_FIND_SERVER );
+            }
+        }
+        catch ( UnknownHostException ex )
+        {
+            throw new JOTLException( "The host could not be reached.", ex );
+        }
+        catch ( IOException ioe )
+        {
+            throw new JOTLException( "IO exception when trying to reach the server..", ioe );
         }
     }
 
     /**
      * Convenvience constructor. Will query the server immidiately.
-     * @param host      the hostname (openttd.someserver.com) or IPv4 to contact (ex: 127.0.0.1)
-     * @param fromPort  the port to use
-     * @param destPort  the port to contact
+     *
+     * @param host the hostname (openttd.someserver.com) or IPv4 to contact (ex:
+     * 127.0.0.1)
+     * @param fromPort the port to use
+     * @param destPort the port to contact
      * @throws com.camelspotting.openttd.JOTLException
      */
-    public JOTLQuerier(String host, int fromPort, int destPort) throws JOTLException {
-        this(host, fromPort, destPort, true);
+    public JOTLQuerier( String host, int fromPort, int destPort ) throws JOTLException
+    {
+        this( host, fromPort, destPort, true );
     }
 
     /**
-     * Constructor with default values of
-     * local port 2222.
-     * @param host      the hostname (openttd.someserver.com) or IPv4 to contact (ex: 127.0.0.1)
-     * @param destPort  the port to contact
+     * Constructor with default values of local port 2222.
+     *
+     * @param host the hostname (openttd.someserver.com) or IPv4 to contact (ex:
+     * 127.0.0.1)
+     * @param destPort the port to contact
      * @param queryInfo whether to query server immidiately
      * @throws com.camelspotting.openttd.JOTLException
      */
-    public JOTLQuerier(String host, int destPort, boolean queryInfo) throws JOTLException {
-        this(host, 2222, destPort, queryInfo);
+    public JOTLQuerier( String host, int destPort, boolean queryInfo ) throws JOTLException
+    {
+        this( host, 2222, destPort, queryInfo );
     }
 
     /**
-     * Constructor with default values of
-     * local port 2222. Will query the server immidiately.
-     * @param host      the hostname (openttd.someserver.com) or IPv4 to contact (ex: 127.0.0.1)
-     * @param destPort  the port to contact
+     * Constructor with default values of local port 2222. Will query the server
+     * immidiately.
+     *
+     * @param host the hostname (openttd.someserver.com) or IPv4 to contact (ex:
+     * 127.0.0.1)
+     * @param destPort the port to contact
      * @throws com.camelspotting.openttd.JOTLException
      */
-    public JOTLQuerier(String host, int destPort) throws JOTLException {
-        this(host, 2222, destPort, true);
+    public JOTLQuerier( String host, int destPort ) throws JOTLException
+    {
+        this( host, 2222, destPort, true );
     }
 
     /**
-     * Constructor with default values of using local port 2222 and remote
-     * port 3979.
-     * @param host      the hostname (openttd.someserver.com) or IPv4 to contact (ex: 127.0.0.1)
+     * Constructor with default values of using local port 2222 and remote port
+     * 3979.
+     *
+     * @param host the hostname (openttd.someserver.com) or IPv4 to contact (ex:
+     * 127.0.0.1)
      * @param queryInfo whether to query server immidiately
      * @throws com.camelspotting.openttd.JOTLException
      */
-    public JOTLQuerier(String host, boolean queryInfo) throws JOTLException {
-        this(host, 2222, 3979, queryInfo);
+    public JOTLQuerier( String host, boolean queryInfo ) throws JOTLException
+    {
+        this( host, 2222, 3979, queryInfo );
     }
 
     /**
-     * Constructor with default values of using local port 2222 and remote
-     * port 3979. Will query the server immidiately.
-     * @param host      the hostname (openttd.someserver.com) or IPv4 to contact (ex: 127.0.0.1)
+     * Constructor with default values of using local port 2222 and remote port
+     * 3979. Will query the server immidiately.
+     *
+     * @param host the hostname (openttd.someserver.com) or IPv4 to contact (ex:
+     * 127.0.0.1)
      * @throws com.camelspotting.openttd.JOTLException
      */
-    public JOTLQuerier(String host) throws JOTLException {
-        this(host, 2222, 3979, true);
+    public JOTLQuerier( String host ) throws JOTLException
+    {
+        this( host, 2222, 3979, true );
     }
 
     /**
-     * This method is for making the program print out debug messages to
-     * stdout.
-     * @param on    whether or not to print messages
+     * This method is for making the program print out debug messages to stdout.
+     *
+     * @param on whether or not to print messages
      */
-    public void setDebugMode(boolean on) {
+    public void setDebugMode( boolean on )
+    {
         debug = on;
     }
 
     /**
-     * This method constructs the grfs request packet. This is done here
-     * instead of in the enum since it requires dynamic coding.
-     * @return      a {@link DatagramPacket} ready for sending
+     * This method constructs the grfs request packet. This is done here instead
+     * of in the enum since it requires dynamic coding.
+     *
+     * @return a {@link DatagramPacket} ready for sending
      */
-    private DatagramPacket createNewGRFSPacket() {
+    private DatagramPacket createNewGRFSPacket()
+    {
         DatagramPacket querypacket = null;
         //TODO: Bruk informasjonen lagret i ClientsInfo.
         return querypacket;
@@ -230,218 +298,275 @@ public final class JOTLQuerier implements Comparable<JOTLQuerier> {
 
     /**
      * Method for querying the server for information.
-     * @param pt    the type of {@link SendablePacketType} to send
+     *
+     * @param pt the type of {@link SendablePacketType} to send
      * @throws com.camelspotting.openttd.JOTLException
      */
-    public void query(SendablePacketType pt) throws JOTLException {
-        LOG.trace(String.format("query(packet=%s)", pt));
-        if (!writable) {
-            throw new JOTLException("The program has disallowed this operation at this point.");
+    public void query( SendablePacketType pt ) throws JOTLException
+    {
+        LOG.trace( String.format( "query(packet=%s)", pt ) );
+        if ( !writable )
+        {
+            throw new JOTLException( "The program has disallowed this operation at this point." );
         }
 
-        try {
-            if (socket == null || socket.isClosed()) {
-                socket = new DatagramSocket(fromPort);
-                socket.setSoTimeout(5000);
+        try
+        {
+            if ( socket == null || socket.isClosed() )
+            {
+                socket = new DatagramSocket( fromPort );
+                socket.setSoTimeout( 5000 );
             }
             DatagramPacket querypacket = null;
             /*if (pt == SendablePacketType.CLIENT_GET_NEWGRFS) {
-            // This packet type is dependant on the FIND_SERVER packet
-            if (serverResponseInfo == null) {
-            query(SendablePacketType.CLIENT_FIND_SERVER);
-            }
-            querypacket = createNewGRFSPacket();
-            } else {*/
-            querypacket = pt.createPacket(address, destPort);
+             // This packet type is dependant on the FIND_SERVER packet
+             if (serverResponseInfo == null) {
+             query(SendablePacketType.CLIENT_FIND_SERVER);
+             }
+             querypacket = createNewGRFSPacket();
+             } else {*/
+            querypacket = pt.createPacket( address, destPort );
             //}
-            socket.send(querypacket);
-            LOG.debug("Packet of type " + pt.toString() + " sent.");
-            recieve(null);
-        } catch (IOException ioe) {
+            socket.send( querypacket );
+            LOG.debug( "Packet of type " + pt.toString() + " sent." );
+            recieve( null );
+        }
+        catch ( IOException ioe )
+        {
             boolean closed = false;
-            if (socket != null) {
-                try {
+            if ( socket != null )
+            {
+                try
+                {
                     socket.close();
                     closed = true;
-                } catch (Exception ex) {
-                    LOG.error("Could not close socket.", ex);
+                }
+                catch ( Exception ex )
+                {
+                    LOG.error( "Could not close socket.", ex );
                 }
             }
-            throw new JOTLException(ioe.getMessage() + (closed ? " Action taken: Socket closed." : ""));
+            throw new JOTLException( ioe.getMessage() + ( closed ? " Action taken: Socket closed." : "" ) );
         }
     }
 
-    private static byte[] trimPacket(byte[] data, int actualLength) {
-        byte[] A = new byte[actualLength];
-        System.arraycopy(data, 0, A, 0, actualLength);
+    private static byte[] trimPacket( byte[] data, int actualLength )
+    {
+        byte[] A = new byte[ actualLength ];
+        System.arraycopy( data, 0, A, 0, actualLength );
         return A;
     }
 
     /**
      * Private method for recieving replies from the server.
+     *
      * @throws com.camelspotting.openttd.JOTLException
      */
-    private void recieve(byte[] data) throws IOException, SocketException {
-        if (data == null) {
-            byte[] reply = new byte[maxPacketSize];
-            DatagramPacket recieved = new DatagramPacket(reply, maxPacketSize);
-            socket.receive(recieved); //Blokkerende metodekall
+    private void recieve( byte[] data ) throws IOException, SocketException
+    {
+        if ( data == null )
+        {
+            byte[] reply = new byte[ maxPacketSize ];
+            DatagramPacket recieved = new DatagramPacket( reply, maxPacketSize );
+            socket.receive( recieved ); //Blokkerende metodekall
             socket.close();
-            data = trimPacket(recieved.getData(), recieved.getLength());
+            data = trimPacket( recieved.getData(), recieved.getLength() );
         }
 
-        RecievablePacketType type = RecievablePacketType.getEnum(data[2]);
+        RecievablePacketType type = RecievablePacketType.getEnum( data[2] );
 
-        StringBuilder sb = new StringBuilder("Recieved packet!");
-        sb.append("\n\tPacket Type ").append(type).append(":");
-        sb.append("\n\tOpenTTD UDP-query Version: ").append(data[3]);
-        sb.append("\n\tMessage length: ").append(data.length).append(".");
-        sb.append("\n\tMessage: ").append(Arrays.toString(data));
-        LOG.debug(sb.toString());
+        StringBuilder sb = new StringBuilder( "Recieved packet!" );
+        sb.append( "\n\tPacket Type " ).append( type ).append( ":" );
+        sb.append( "\n\tOpenTTD UDP-query Version: " ).append( data[3] );
+        sb.append( "\n\tMessage length: " ).append( data.length ).append( "." );
+        sb.append( "\n\tMessage: " ).append( Arrays.toString( data ) );
+        LOG.debug( sb.toString() );
 
-        switch (type) {
+        switch ( type )
+        {
             case SERVER_RESPONSE:
-                LOG.info("Parsing server response information.");
-                this.serverResponseInfo = new ClientsInfo(data);
-                LOG.info("Server response information parsed.");
+                LOG.info( "Parsing server response information." );
+                this.serverResponseInfo = new ClientsInfo( data );
+                LOG.info( "Server response information parsed." );
                 break;
             case SERVER_DETAIL_INFO:
-                LOG.info("Parsing server detailed information.");
-                this.serverDetailedInfo = new ServerInfo(data);
-                LOG.info("Server detailed information parsed.");
+                LOG.info( "Parsing server detailed information." );
+                this.serverDetailedInfo = new ServerInfo( data );
+                LOG.info( "Server detailed information parsed." );
                 break;
             case SERVER_NEWGRFS:
-                LOG.info("Parsing newGRFs information.");
-                serverResponseInfo.parseGRFNames(data);
-                LOG.info("NewGRFs information parsed.");
+                LOG.info( "Parsing newGRFs information." );
+                serverResponseInfo.parseGRFNames( data );
+                LOG.info( "NewGRFs information parsed." );
                 break;
         }
     }
 
     /**
-     * This package-restricted method is so that the program may render
-     * this object unable to do updates. This can only be done by any
-     * program written by the authors.
+     * This package-restricted method is so that the program may render this
+     * object unable to do updates. This can only be done by any program written
+     * by the authors.
      */
-    void makeUnupdatable() {
+    void makeUnupdatable()
+    {
         writable = false;
     }
 
     /**
      * Convenience method for updating all information.
+     *
      * @throws com.camelspotting.openttd.JOTLException
      * @see #query(SendablePacketType pt)
      */
-    public void queryAll() throws JOTLException {
-        if (!writable) {
-            throw new JOTLException("The program has disallowed this operation at this point.");
+    public void queryAll() throws JOTLException
+    {
+        if ( !writable )
+        {
+            throw new JOTLException( "The program has disallowed this operation at this point." );
         }
 
-        for (SendablePacketType spt : SendablePacketType.values()) {
-            query(spt);
+        for ( SendablePacketType spt : SendablePacketType.values() )
+        {
+            query( spt );
         }
     }
 
-    private void queryRest(SendablePacketType exceptThisOne) throws JOTLException {
-        for (SendablePacketType spt : SendablePacketType.values()) {
-            if (spt != exceptThisOne) {
-                query(spt);
+    private void queryRest( SendablePacketType exceptThisOne ) throws JOTLException
+    {
+        for ( SendablePacketType spt : SendablePacketType.values() )
+        {
+            if ( spt != exceptThisOne )
+            {
+                query( spt );
             }
         }
     }
 
     /**
      * Method for accessing server info.
-     * @return  the current {@link ClientsInfo} object or null if no info has been collected
+     *
+     * @return the current {@link ClientsInfo} object or null if no info has
+     * been collected
      */
-    public ClientsInfo getServerResponseInfo() {
+    public ClientsInfo getServerResponseInfo()
+    {
         return serverResponseInfo;
     }
 
     /**
      * Method for accessing client info.
-     * @return  the current {@link ServerInfo} object or null if no info has been collected
+     *
+     * @return the current {@link ServerInfo} object or null if no info has been
+     * collected
      */
-    public ServerInfo getServerDetailedInfo() {
+    public ServerInfo getServerDetailedInfo()
+    {
         return serverDetailedInfo;
     }
 
     /**
      * This method compares when the objects were instantiated.
-     * @param o     the object to compare with
-     * @return      1 if this is newer, -1 if this is older, or 0 if equal
+     *
+     * @param o the object to compare with
+     * @return 1 if this is newer, -1 if this is older, or 0 if equal
      */
     @Override
-    public int compareTo(JOTLQuerier o) {
+    public int compareTo( JOTLQuerier o )
+    {
         long diff = o.timeStamp - this.timeStamp;
-        if (diff > 0) {
+        if ( diff > 0 )
+        {
             return 1;
-        } else if (diff < 0) {
+        }
+        else if ( diff < 0 )
+        {
             return -1;
-        } else {
+        }
+        else
+        {
             return 0;
         }
     }
 
     /**
      * Convenience method for archiving gathered information.
-     * @return      a {@link Game} object containing the gathered information
+     *
+     * @return a {@link Game} object containing the gathered information
      */
-    public Game toGame() {
-        return new Game(serverResponseInfo, serverDetailedInfo);
+    public Game toGame()
+    {
+        return new Game( serverResponseInfo, serverDetailedInfo );
     }
 
     /**
-     * Method for getting a textual representation of this object.
-     * Very useful for debugging.
-     * @return      a {@link String} containing all data.
+     * Method for getting a textual representation of this object. Very useful
+     * for debugging.
+     *
+     * @return a {@link String} containing all data.
      */
     @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder("JOTLQuerier: \n");
-        sb.append(serverResponseInfo.toString());
-        sb.append(serverDetailedInfo.toString());
+    public String toString()
+    {
+        StringBuilder sb = new StringBuilder( "JOTLQuerier: \n" );
+        sb.append( serverResponseInfo.toString() );
+        sb.append( serverDetailedInfo.toString() );
         return sb.toString();
     }
 
-    private static void printUsage() {
-        LOG.debug("Showing cli usage.");
-        println("Arguments: server:port");
-        println("-----------------------");
-        println("Failure to supply port will cause program to try default port of 3389.");
+    private static void printUsage()
+    {
+        LOG.debug( "Showing cli usage." );
+        println( "Arguments: server:port" );
+        println( "-----------------------" );
+        println( "Failure to supply port will cause program to try default port of 3389." );
     }
 
-    private static void println(String msg) {
-        System.out.println(msg);
+    private static void println( String msg )
+    {
+        System.out.println( msg );
     }
 
-    public static void main(String[] args) {
+    public static void main( String[] args )
+    {
         String server = null;
         int port = 3389;
-        if (args.length == 0) {
+        if ( args.length == 0 )
+        {
             printUsage();
-        } else {
-            String[] A = args[0].split(":");
+        }
+        else
+        {
+            String[] A = args[0].split( ":" );
             server = A[0];
-            if (A.length > 1) {
-                try {
-                    port = new Integer(A[1]);
-                } catch (NumberFormatException ex) {
-                    String msg = String.format("Syntax error. Port must be number. Defaulting to %d.", port);
-                    LOG.debug(msg);
-                    println(msg);
+            if ( A.length > 1 )
+            {
+                try
+                {
+                    port = new Integer( A[1] );
+                }
+                catch ( NumberFormatException ex )
+                {
+                    String msg = String.format( "Syntax error. Port must be number. Defaulting to %d.", port );
+                    LOG.debug( msg );
+                    println( msg );
                 }
             }
-            try {
-                LOG.info(String.format("Querying server '%s' at port %d.", server, port));
-                JOTLQuerier q = new JOTLQuerier(server);
-                System.out.println(q);
-            } catch (JOTLException ex) {
+            try
+            {
+                LOG.info( String.format( "Querying server '%s' at port %d.", server, port ) );
+                JOTLQuerier q = new JOTLQuerier( server );
+                System.out.println( q );
+            }
+            catch ( JOTLException ex )
+            {
                 //ex.printStackTrace();
-                println(ex.getMessage());
-                try {
-                    JOptionPane.showMessageDialog(new JFrame(), ex.getMessage(), "Error!", JOptionPane.WARNING_MESSAGE);
-                } catch (Exception e) {
+                println( ex.getMessage() );
+                try
+                {
+                    JOptionPane.showMessageDialog( new JFrame(), ex.getMessage(), "Error!", JOptionPane.WARNING_MESSAGE );
+                }
+                catch ( Exception e )
+                {
                 }
             }
         }

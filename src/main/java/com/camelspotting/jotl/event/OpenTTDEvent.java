@@ -19,69 +19,77 @@ package com.camelspotting.jotl.event;
 import java.util.Arrays;
 
 /**
- * This class represents the events that may occur during
- * an OpenTTD-game.
- * NOTE: The electric rail availability may
- * be falsely reported since it can be deactivated
- * with a patch and such a deactivation is undetectable through
+ * This class represents the events that may occur during an OpenTTD-game. NOTE:
+ * The electric rail availability may be falsely reported since it can be
+ * deactivated with a patch and such a deactivation is undetectable through
  * communication with the server.
+ *
  * @author Mats Andreassen
  * @version 1.0
  */
-public class OpenTTDEvent {
+public class OpenTTDEvent
+{
 
-    /** The type of event*/
+    /**
+     * The type of event
+     */
     private OpenTTDEventType type;
-    /** Objects of interest */
+    /**
+     * Objects of interest
+     */
     private Object[] objects;
 
     /**
      * Constructor for making events.
-     * @param t     the type of event
+     *
+     * @param t the type of event
      */
-    public OpenTTDEvent(OpenTTDEventType t, Object... objects) {
+    public OpenTTDEvent( OpenTTDEventType t, Object... objects )
+    {
         this.type = t;
         this.objects = objects;
     }
 
     /**
      * Depending on what type of event this is this array contains different
-     * objects.
-     * GAME_END           -> [0] is an {@link Integer} containing the year of this event
-     * GAME_START         -> [0] is an {@link Integer} containing the year of this event
-     * GAME_IN_PROGRESS   -> [0] is an {@link Integer} containing the year of this event
-     * NEW_LEADER         -> [0] is the {@link Company} now in the lead
-     * ELECTRIC_AVAILABLE -> nothing
-     * MONORAIL_AVAILABLE -> nothing
-     * MAGLEV_AVAILABLE   -> nothing
-     * COMPANY_NEW        -> [0] is the {@link Company}
-     * COMPANY_REMOVED    -> [0] is the removed {@link Company}
-     * PAUSED             -> [0] is an {@link Integer} containing the year of this event
-     * UNPAUSED           -> [0] is an {@link Integer} containing the year of this event
-     * CLIENT_JOIN        -> [0] is the {@link Client} that just joined
-     * CLIENT_LEFT        -> [0] is the {@link Client} that just left
-     * LOST_CONNECTION    -> nothing
-     * COMPANY_REMOVED    -> [0] is the {@link Company}
-     * @return      an Object array of length at least 0.
+     * objects. GAME_END -> [0] is an {@link Integer} containing the year of
+     * this event GAME_START -> [0] is an {@link Integer} containing the year of
+     * this event GAME_IN_PROGRESS -> [0] is an {@link Integer} containing the
+     * year of this event NEW_LEADER -> [0] is the {@link Company} now in the
+     * lead ELECTRIC_AVAILABLE -> nothing MONORAIL_AVAILABLE -> nothing
+     * MAGLEV_AVAILABLE -> nothing COMPANY_NEW -> [0] is the {@link Company}
+     * COMPANY_REMOVED -> [0] is the removed {@link Company} PAUSED -> [0] is an
+     * {@link Integer} containing the year of this event UNPAUSED -> [0] is an
+     * {@link Integer} containing the year of this event CLIENT_JOIN -> [0] is
+     * the {@link Client} that just joined CLIENT_LEFT -> [0] is the
+     * {@link Client} that just left LOST_CONNECTION -> nothing COMPANY_REMOVED
+     * -> [0] is the {@link Company}
+     *
+     * @return an Object array of length at least 0.
      */
-    public Object[] getObjects() {
-        return (objects != null) ? objects : new Object[0];
+    public Object[] getObjects()
+    {
+        return ( objects != null ) ? objects : new Object[ 0 ];
     }
 
     /**
      * This method returns the type of event.
-     * @return      the type
+     *
+     * @return the type
      */
-    public OpenTTDEventType getType() {
+    public OpenTTDEventType getType()
+    {
         return type;
     }
 
     /**
      * This gives a description of this event.
-     * @return      the description of the type and the list of appended objects
+     *
+     * @return the description of the type and the list of appended objects
      */
     @Override
-    public String toString() {
-        return new StringBuilder("OpenTTDEvent(").append(type.getDescription()).append(") Objects: ").append(Arrays.toString(objects)).toString();
+    public String toString()
+    {
+        return new StringBuilder( "OpenTTDEvent(" ).append( type.getDescription() ).append( ") Objects: " ).append( Arrays.toString( objects ) ).toString();
     }
 }

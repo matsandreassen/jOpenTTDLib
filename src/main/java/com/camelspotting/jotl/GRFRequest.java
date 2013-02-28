@@ -18,68 +18,88 @@ package com.camelspotting.jotl;
 
 /**
  * This class represents any graphics requests.
+ *
  * @author Mats Andreassen
  * @version 1.0
  */
-public class GRFRequest {
+public class GRFRequest
+{
 
-    /** The graphic's ID */
+    /**
+     * The graphic's ID
+     */
     private String id;
-    /** The graphic's MD5 checksum */
+    /**
+     * The graphic's MD5 checksum
+     */
     private String md5Check;
-    /** The graphics name */
+    /**
+     * The graphics name
+     */
     private String name;
 
     /**
      * Simple constructor.
-     * @param id            the graphic's ID
-     * @param md5Check      the graphic's MD5 checksum
-     * @param name          the graphic's name
+     *
+     * @param id the graphic's ID
+     * @param md5Check the graphic's MD5 checksum
+     * @param name the graphic's name
      */
-    GRFRequest(String id, String md5Check,String name) {
+    GRFRequest( String id, String md5Check, String name )
+    {
         this.id = id;
         this.md5Check = md5Check;
         this.name = name;
     }
-    
+
     /**
      * Simpler constructor.
-     * @param id            the graphic's ID
-     * @param md5Check      the graphic's MD5 checksum
+     *
+     * @param id the graphic's ID
+     * @param md5Check the graphic's MD5 checksum
      */
-    GRFRequest(String id, String md5Check) {
-        this(id,md5Check,"n/a");
+    GRFRequest( String id, String md5Check )
+    {
+        this( id, md5Check, "n/a" );
     }
 
     /**
      * Getter for the graphic's name
-     * @return      the graphic's name or 'n/a' if it has not been downloaded
+     *
+     * @return the graphic's name or 'n/a' if it has not been downloaded
      */
-    public String getName() {
+    public String getName()
+    {
         return name;
     }
-    
+
     /**
      * Method for setting the name when the information has become available.
-     * @param name      the name to set
+     *
+     * @param name the name to set
      */
-    void setName(String name) {
+    void setName( String name )
+    {
         this.name = name;
     }
 
     /**
      * Getter for id.
-     * @return  the id
+     *
+     * @return the id
      */
-    public String getId() {
+    public String getId()
+    {
         return id;
     }
 
     /**
      * Getter for MD5 checksum.
-     * @return      the checksum
+     *
+     * @return the checksum
      */
-    public String getMD5Checksum() {
+    public String getMD5Checksum()
+    {
         return md5Check;
     }
 }

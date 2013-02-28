@@ -17,20 +17,22 @@
 package com.camelspotting.jotl.event;
 
 /**
- * Any classes that is to monitor an OpenTTD-server and it's games will
- * have to implement this interface and register with the {@link ServerHandler}
- * to recieve events.
+ * Any classes that is to monitor an OpenTTD-server and it's games will have to
+ * implement this interface and register with the {@link ServerHandler} to
+ * recieve events.
+ *
  * @author Mats Andreassen
  * @version 1.0
  */
-public interface OpenTTDListener {
-    
+public interface OpenTTDListener
+{
+
     /**
-     * Method is invoked every time an event occurs. 
-     * Check {@link OpenTTDEvent} to see
-     * what events are triggered.
-     * @param evt       the event triggered
+     * Method is invoked every time an event occurs. Check {@link OpenTTDEvent}
+     * to see what events are triggered.
+     *
+     * @param evt the event triggered
      * @see OpenTTDEvent
      */
-    public void eventOccured(OpenTTDEvent evt);
+    public void eventOccured( OpenTTDEvent evt );
 }

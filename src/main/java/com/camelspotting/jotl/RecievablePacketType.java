@@ -20,47 +20,63 @@
 package com.camelspotting.jotl;
 
 /**
- * This enum is for enumerating the different types of UDP packets
- * that the OpenTTD server will be sending in reply any packet we might send.
+ * This enum is for enumerating the different types of UDP packets that the
+ * OpenTTD server will be sending in reply any packet we might send.
+ *
  * @author Eivind Brandth Smedseng
  * @author Mats Andreassen
  * @version 1.0
  * @see SendablePacketType
  */
-public enum RecievablePacketType {
+public enum RecievablePacketType
+{
 
-	/** Reply from the game server with game information */
-	SERVER_RESPONSE(1),
-	/** Reply from the game server about details of the game, such as companies */
-	SERVER_DETAIL_INFO(3),
-	//    MASTER_ACK_REGISTER(5),   // Packet indicating registration has succedeed
-	//    MASTER_RESPONSE_LIST(7),  // Response from master server with server ip's + port's
-	/** Reply from server with list of NewGRF's requested */
-	SERVER_NEWGRFS(10);
+    /**
+     * Reply from the game server with game information
+     */
+    SERVER_RESPONSE( 1 ),
+    /**
+     * Reply from the game server about details of the game, such as companies
+     */
+    SERVER_DETAIL_INFO( 3 ),
+    //    MASTER_ACK_REGISTER(5),   // Packet indicating registration has succedeed
+    //    MASTER_RESPONSE_LIST(7),  // Response from master server with server ip's + port's
+    /**
+     * Reply from server with list of NewGRF's requested
+     */
+    SERVER_NEWGRFS( 10 );
 //    END(11);                  // ?
-	/** Value received from the OpenTTD-server to indicate type of package */
-	private int value;
+    /**
+     * Value received from the OpenTTD-server to indicate type of package
+     */
+    private int value;
 
-	/**
-	 * Simple constructor.
-	 * @param value     the final byte for the packet
-	 */
-	private RecievablePacketType(int value) {
-		this.value = value;
-	}
+    /**
+     * Simple constructor.
+     *
+     * @param value the final byte for the packet
+     */
+    private RecievablePacketType( int value )
+    {
+        this.value = value;
+    }
 
-	/**
-	 * Method for getting the enum corresponding
-	 * to the value of a packet that is received.
-	 * @param value     the packet type to look for
-	 * @return          the enum in question or null if we don't "understand" this packet
-	 */
-	static public RecievablePacketType getEnum(int value) {
-		for (RecievablePacketType rpt : values()) {
-			if (rpt.value == value) {
-				return rpt;
-			}
-		}
-		return null;
-	}
+    /**
+     * Method for getting the enum corresponding to the value of a packet that
+     * is received.
+     *
+     * @param value the packet type to look for
+     * @return the enum in question or null if we don't "understand" this packet
+     */
+    static public RecievablePacketType getEnum( int value )
+    {
+        for ( RecievablePacketType rpt : values() )
+        {
+            if ( rpt.value == value )
+            {
+                return rpt;
+            }
+        }
+        return null;
+    }
 }
