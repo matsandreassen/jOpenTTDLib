@@ -7,11 +7,7 @@
         </encoder>
     </appender>
 
-    <timestamp key="time" datePattern="yyyyMMdd"/>
-    
-    <logger name="com.camelspotting.jotl" level="INFO" />
-
-    <root level="TRACE">
+    <root level="OFF">
         <appender-ref ref="STDOUT" />
     </root>
 
