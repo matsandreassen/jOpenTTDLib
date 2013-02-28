@@ -13,7 +13,6 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <netbeans.hint.license>bsd</netbeans.hint.license>
         <slf4j.version>1.6.1</slf4j.version>
     </properties>
 
@@ -42,6 +41,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.0</version>
                 <configuration>
                     <source>1.6</source>
                     <target>1.6</target>
@@ -50,15 +50,15 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
+                <version>2.4</version>
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>JOTLQuerier</mainClass>
-                            <packageName>com.camelspotting.jotl</packageName>
+                            <mainClass>com.camelspotting.jotl.JOTLQuerier</mainClass>
                         </manifest>
                         <manifestEntries>
                             <mode>development</mode>
-                            <url>${pom.url}</url>
+                            <url>${project.url}</url>
                         </manifestEntries>
                     </archive>
                 </configuration>
@@ -66,7 +66,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>1.4</version>
+                <version>2.0</version>
                 <executions>
                     <execution>
                         <phase>package</phase>
@@ -74,7 +74,7 @@
                             <goal>shade</goal>
                         </goals>
                         <configuration>
-                            <finalName>shade-${artifactId}-${version}</finalName>
+                            <finalName>shade-${project.artifactId}-${project.version}</finalName>
                         </configuration>
                     </execution>
                 </executions>
