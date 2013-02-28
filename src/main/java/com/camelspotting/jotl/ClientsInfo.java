@@ -141,10 +141,10 @@ public final class ClientsInfo
             case 3:
                 LOG.info( "Processing version 3 data." );
                 this.gameDate = Parser.parseDate( Parser.parse32BitNumber( data, i ) );
-                LOG.debug( "Game date: " + Arrays.toString( gameDate ) );
+                LOG.debug( "Game date: {}" , Arrays.toString( gameDate ) );
                 i += 4;
                 this.startDate = Parser.parseDate( Parser.parse32BitNumber( data, i ) );
-                LOG.debug( "Start date: " + Arrays.toString( startDate ) );
+                LOG.debug( "Start date: {}", Arrays.toString( startDate ) );
                 i += 4;
             case 2:
                 LOG.info( "Processing version 2 data." );
@@ -154,11 +154,11 @@ public final class ClientsInfo
             case 1:
                 LOG.info( "Processing version 1 data." );
                 int length = Parser.locateNextZero( data, i );
-                LOG.debug( "Server name seems to be " + length + " characters long." );
+                LOG.debug( "Server name seems to be {} characters long.", length );
                 this.serverName = Parser.parseString( data, i, length ).trim();
                 i += length + 1;
                 length = Parser.locateNextZero( data, i );
-                LOG.debug( "Revision seems to be " + length + " characters long." );
+                LOG.debug( "Revision seems to be {} characters long.", length );
                 this.revision = Parser.parseVersion( Parser.parseString( data, i, length ).trim() );
                 i += length + 1;
                 this.serverLang = data[i++];

@@ -304,7 +304,7 @@ public final class JOTLQuerier implements Comparable<JOTLQuerier>
      */
     public void query( SendablePacketType pt ) throws JOTLException
     {
-        LOG.trace( String.format( "query(packet=%s)", pt ) );
+        LOG.trace( "query(packet={})", pt );
         if ( !writable )
         {
             throw new JOTLException( "The program has disallowed this operation at this point." );
@@ -317,7 +317,7 @@ public final class JOTLQuerier implements Comparable<JOTLQuerier>
                 socket = new DatagramSocket( fromPort );
                 socket.setSoTimeout( 5000 );
             }
-            DatagramPacket querypacket = null;
+            DatagramPacket querypacket;
             /*if (pt == SendablePacketType.CLIENT_GET_NEWGRFS) {
              // This packet type is dependant on the FIND_SERVER packet
              if (serverResponseInfo == null) {
@@ -328,7 +328,7 @@ public final class JOTLQuerier implements Comparable<JOTLQuerier>
             querypacket = pt.createPacket( address, destPort );
             //}
             socket.send( querypacket );
-            LOG.debug( "Packet of type " + pt.toString() + " sent." );
+            LOG.debug( "Packet of type {} sent.", pt.toString() );
             recieve( null );
         }
         catch ( IOException ioe )
@@ -346,7 +346,7 @@ public final class JOTLQuerier implements Comparable<JOTLQuerier>
                     LOG.error( "Could not close socket.", ex );
                 }
             }
-            throw new JOTLException( ioe.getMessage() + ( closed ? " Action taken: Socket closed." : "" ) );
+            throw new JOTLException( ioe.getMessage() + ( closed ? " Action taken: Socket closed." : "" ), ioe );
         }
     }
 
@@ -528,7 +528,7 @@ public final class JOTLQuerier implements Comparable<JOTLQuerier>
 
     public static void main( String[] args )
     {
-        String server = null;
+        String server;
         int port = 3389;
         if ( args.length == 0 )
         {

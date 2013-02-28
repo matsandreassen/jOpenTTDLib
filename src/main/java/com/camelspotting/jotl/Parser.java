@@ -158,9 +158,8 @@ public final class Parser
      */
     static long parse64BitNumber( byte[] input, int offset )
     {
-        long i = 0;
         long[] data = getUnsigned64BitValues( input, offset );
-        i = data[0];
+        long i = data[0];
         i += ( data[1] << 8 );
         i += ( data[2] << 16 );
         i += ( data[3] << 24 );
@@ -168,7 +167,7 @@ public final class Parser
         i += ( data[5] << 40 );
         i += ( data[6] << 48 );
         i += ( data[7] << 56 );
-        LOG.debug( "64 bit " + Arrays.toString( data ) + " ==> " + i );
+        LOG.debug( "64 bit {} ==> {}", Arrays.toString( data ), i );
         return i;
     }
 
@@ -181,13 +180,12 @@ public final class Parser
      */
     static int parse32BitNumber( byte[] input, int offset )
     {
-        int i = 0;
         int[] data = getUnsigned32BitValues( input, offset );
-        i = data[0];
+        int i = data[0];
         i += ( data[1] << 8 );
         i += ( data[2] << 16 );
         i += ( data[3] << 24 );
-        LOG.debug( "32 bit " + Arrays.toString( data ) + " ==> " + i );
+        LOG.debug( "32 bit {} ==> {}", Arrays.toString( data ), i );
         return i;
     }
 
@@ -200,11 +198,10 @@ public final class Parser
      */
     static int parse16BitNumber( byte[] input, int offset )
     {
-        int i = 0;
         int[] data = getUnsigned16BitValues( input, offset );
-        i = data[0];
+        int i = data[0];
         i += ( data[1] << 8 );
-        LOG.debug( "16 bit " + Arrays.toString( data ) + " ==> " + i );
+        LOG.debug( "16 bit {} ==> ", Arrays.toString( data ), i );
         return i;
     }
 
@@ -216,8 +213,7 @@ public final class Parser
      * @return the number.
      *
      * static int parse16BitNumber(byte[] data, int offset) { return
-     * parse16BitNumber(data, offset, Endian.LITTLE);
-    }
+     * parse16BitNumber(data, offset, Endian.LITTLE); }
      */
     /**
      * Method for parsing 1 byte.
@@ -322,7 +318,7 @@ public final class Parser
         {
             day, month, year
         };
-        LOG.debug( "date(" + date + ") ==> " + Arrays.toString( A ) );
+        LOG.debug( "date({}) ==> {}", date, Arrays.toString( A ) );
         return A;
     }
 
@@ -347,7 +343,7 @@ public final class Parser
      */
     static InetAddress parseHost( String host ) throws UnknownHostException
     {
-        InetAddress addr = null;
+        InetAddress addr;
         if ( Pattern.matches( ipv4Pattern, host ) )
         {
             addr = parseIPv4( host );
@@ -356,7 +352,7 @@ public final class Parser
          } */ else
         { // Try to resolve through DNS
             addr = InetAddress.getByName( host );
-            LOG.debug( host + " was resolved to " + addr.getHostAddress() );
+            LOG.debug( "{} was resolved to {}", host, addr.getHostAddress() );
         }
         return addr;
     }
@@ -376,25 +372,11 @@ public final class Parser
         {
             A[i] = (byte) (int) Integer.valueOf( S[i] );
         }
-        LOG.debug( "Parsed ipv4 to: " + Arrays.toString( A ) );
+        LOG.debug( "Parsed ipv4 to: {}", Arrays.toString( A ) );
         return InetAddress.getByAddress( new byte[]
         {
             A[0], A[1], A[2], A[3]
         } );
-    }
-
-    /**
-     * Conveninence method for parsing an version 6 IP-address. NOTE: This
-     * method does not work since version 6 is not supported by OpenTTD.
-     *
-     * @param host the IP to parse
-     * @return an {@link InetAddress}-object
-     * @throws java.net.UnknownHostException
-     */
-    private static InetAddress parseIPV6( String host ) throws UnknownHostException
-    {
-        // Feature not yet implemented.
-        return null;
     }
 
     /**
