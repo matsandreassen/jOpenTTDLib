@@ -111,7 +111,7 @@ public final class JOTLQuerier implements Comparable<JOTLQuerier>
         {
             socket = new DatagramSocket( localPort );
             socket.setSoTimeout( timeout );
-            LOG.info( "Pinging OpenTTD server at " + addr.getHostAddress() );
+            LOG.info( "Pinging OpenTTD server at {}.", addr.getHostAddress() );
             socket.send( SendablePacketType.CLIENT_FIND_SERVER.createPacket( addr, destPort ) );
             DatagramPacket dp = new DatagramPacket( new byte[ maxPacketSize ], maxPacketSize );
             socket.receive( dp );
@@ -120,7 +120,7 @@ public final class JOTLQuerier implements Comparable<JOTLQuerier>
         }
         catch ( BindException bex )
         {
-            LOG.info( "This local port '" + localPort + "' was already in use." );
+            LOG.info( "This local port '{}' was already in use.", localPort );
             return null;
         }
         catch ( SocketException sex )
@@ -130,7 +130,6 @@ public final class JOTLQuerier implements Comparable<JOTLQuerier>
         }
         catch ( IOException ioe )
         {
-            //ioe.printStackTrace();
             LOG.info( "We could not even try to reach the server. What's wrong?", ioe );
             return null;
         }
@@ -523,7 +522,7 @@ public final class JOTLQuerier implements Comparable<JOTLQuerier>
 
     private static void println( String msg )
     {
-        System.out.println( msg );
+        System.console().writer().println( msg );
     }
 
     public static void main( String[] args )
@@ -549,25 +548,18 @@ public final class JOTLQuerier implements Comparable<JOTLQuerier>
                     String msg = String.format( "Syntax error. Port must be number. Defaulting to %d.", port );
                     LOG.debug( msg );
                     println( msg );
+                    printUsage();
                 }
             }
             try
             {
                 LOG.info( String.format( "Querying server '%s' at port %d.", server, port ) );
                 JOTLQuerier q = new JOTLQuerier( server );
-                System.out.println( q );
+                println( q.toString() );
             }
             catch ( JOTLException ex )
             {
-                //ex.printStackTrace();
                 println( ex.getMessage() );
-                try
-                {
-                    JOptionPane.showMessageDialog( new JFrame(), ex.getMessage(), "Error!", JOptionPane.WARNING_MESSAGE );
-                }
-                catch ( Exception e )
-                {
-                }
             }
         }
     }
