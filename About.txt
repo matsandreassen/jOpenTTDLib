@@ -11,7 +11,6 @@ Contents:
 2 - Main features
 3 - Changelog
 4 - Known bugs
-5 - Current state of the project
 6 - License
 
 -----------------------------------------------------------------------
@@ -93,7 +92,7 @@ having to consult the OpenTTD code, more specifically in date.cpp.
 3) Changelog
 
 Changes:
-- (12th December 2010)
+- (12th December 2010) - 1.0.0
 	Made compatible with OpenTTD 1.0.5.
 	Ant build files swapped out with Maven pom.
 	Introduces dependency on slf4j and log4j.
@@ -139,18 +138,6 @@ Bugfixes:
 4) Known bugs:
 
 The bug tracker can be found at https://sourceforge.net/projects/jopenttdlib/.
-
------------------------------------------------------------------------
-5) Current state of the project
-
-Hopefully we'll reach 1.0-final very soon. Here are some of the things
-we're working on:
-
-- Getting information on what new graphics are being used on the
-  server (severely undertested).
-
-The feature request tracker can be found at
-https://sourceforge.net/projects/jopenttdlib/.
 
 -----------------------------------------------------------------------
 6) License
