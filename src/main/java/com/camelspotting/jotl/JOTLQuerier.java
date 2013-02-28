@@ -16,6 +16,9 @@
  */
 package com.camelspotting.jotl;
 
+import com.beust.jcommander.JCommander;
+import com.beust.jcommander.ParameterException;
+import com.camelspotting.jotl.console.Params;
 import java.io.IOException;
 import java.net.BindException;
 import java.net.DatagramPacket;
@@ -24,8 +27,6 @@ import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.Arrays;
-import javax.swing.JFrame;
-import javax.swing.JOptionPane;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -512,14 +513,6 @@ public final class JOTLQuerier implements Comparable<JOTLQuerier>
         return sb.toString();
     }
 
-    private static void printUsage()
-    {
-        LOG.debug( "Showing cli usage." );
-        println( "Arguments: server:port" );
-        println( "-----------------------" );
-        println( "Failure to supply port will cause program to try default port of 3389." );
-    }
-
     private static void println( String msg )
     {
         System.console().writer().println( msg );
@@ -527,40 +520,26 @@ public final class JOTLQuerier implements Comparable<JOTLQuerier>
 
     public static void main( String[] args )
     {
-        String server;
-        int port = 3389;
-        if ( args.length == 0 )
+        Params params = new Params();
+        JCommander com = new JCommander( params );
+        try
         {
-            printUsage();
+            com.parse( args );
+            String host = params.host;
+            int port = params.port;
+
+            JOTLQuerier q = new JOTLQuerier( host, port );
+            println( q.toString() );
         }
-        else
+        catch ( ParameterException ex )
         {
-            String[] A = args[0].split( ":" );
-            server = A[0];
-            if ( A.length > 1 )
-            {
-                try
-                {
-                    port = new Integer( A[1] );
-                }
-                catch ( NumberFormatException ex )
-                {
-                    String msg = String.format( "Syntax error. Port must be number. Defaulting to %d.", port );
-                    LOG.debug( msg );
-                    println( msg );
-                    printUsage();
-                }
-            }
-            try
-            {
-                LOG.info( String.format( "Querying server '%s' at port %d.", server, port ) );
-                JOTLQuerier q = new JOTLQuerier( server );
-                println( q.toString() );
-            }
-            catch ( JOTLException ex )
-            {
-                println( ex.getMessage() );
-            }
+            println( String.format( "Parse error: %s", ex.getMessage() ) );
+            com.usage();
+        }
+        catch ( JOTLException ex )
+        {
+            LOG.error( ex.getMessage(), ex );
+            println( ex.getMessage() );
         }
     }
 }
