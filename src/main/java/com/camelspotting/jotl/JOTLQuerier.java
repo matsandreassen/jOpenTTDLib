@@ -515,7 +515,7 @@ public final class JOTLQuerier implements Comparable<JOTLQuerier>
 
     private static void println( String msg )
     {
-        System.console().writer().println( msg );
+        System.out.println( msg );
     }
 
     public static void main( String[] args )
