@@ -15,4 +15,6 @@ public class Params
     public String host;
     @Parameter(names={"-p","--port"}, description = "Host port.")
     public int port = 3979;
+    @Parameter(names={"-lp","--local-port"}, description = "The local port to which the local socket is bound.")
+    public int localPort = 2222;
 }

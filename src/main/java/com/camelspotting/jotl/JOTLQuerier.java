@@ -54,7 +54,7 @@ public final class JOTLQuerier implements Comparable<JOTLQuerier>
     /**
      * Maximum packet size for receiving
      */
-    private static int maxPacketSize = 1000;
+    private static final int maxPacketSize = 1000;
     /**
      * This is the server address
      */
@@ -202,48 +202,6 @@ public final class JOTLQuerier implements Comparable<JOTLQuerier>
         {
             throw new JOTLException( "IO exception when trying to reach the server..", ioe );
         }
-    }
-
-    /**
-     * Convenvience constructor. Will query the server immidiately.
-     *
-     * @param host the hostname (openttd.someserver.com) or IPv4 to contact (ex:
-     * 127.0.0.1)
-     * @param fromPort the port to use
-     * @param destPort the port to contact
-     * @throws com.camelspotting.openttd.JOTLException
-     */
-    public JOTLQuerier( String host, int fromPort, int destPort ) throws JOTLException
-    {
-        this( host, fromPort, destPort, true );
-    }
-
-    /**
-     * Constructor with default values of local port 2222.
-     *
-     * @param host the hostname (openttd.someserver.com) or IPv4 to contact (ex:
-     * 127.0.0.1)
-     * @param destPort the port to contact
-     * @param queryInfo whether to query server immidiately
-     * @throws com.camelspotting.openttd.JOTLException
-     */
-    public JOTLQuerier( String host, int destPort, boolean queryInfo ) throws JOTLException
-    {
-        this( host, 2222, destPort, queryInfo );
-    }
-
-    /**
-     * Constructor with default values of local port 2222. Will query the server
-     * immidiately.
-     *
-     * @param host the hostname (openttd.someserver.com) or IPv4 to contact (ex:
-     * 127.0.0.1)
-     * @param destPort the port to contact
-     * @throws com.camelspotting.openttd.JOTLException
-     */
-    public JOTLQuerier( String host, int destPort ) throws JOTLException
-    {
-        this( host, 2222, destPort, true );
     }
 
     /**
@@ -527,8 +485,9 @@ public final class JOTLQuerier implements Comparable<JOTLQuerier>
             com.parse( args );
             String host = params.host;
             int port = params.port;
+            int localPort = params.localPort;
 
-            JOTLQuerier q = new JOTLQuerier( host, port );
+            JOTLQuerier q = new JOTLQuerier( host, port, localPort, true );
             println( q.toString() );
         }
         catch ( ParameterException ex )
