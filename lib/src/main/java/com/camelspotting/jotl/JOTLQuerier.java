@@ -16,9 +16,6 @@
  */
 package com.camelspotting.jotl;
 
-import com.beust.jcommander.JCommander;
-import com.beust.jcommander.ParameterException;
-import com.camelspotting.jotl.console.Params;
 import java.io.IOException;
 import java.net.BindException;
 import java.net.DatagramPacket;
@@ -469,36 +466,5 @@ public final class JOTLQuerier implements Comparable<JOTLQuerier>
         sb.append( serverResponseInfo.toString() );
         sb.append( serverDetailedInfo.toString() );
         return sb.toString();
-    }
-
-    private static void println( String msg )
-    {
-        System.out.println( msg );
-    }
-
-    public static void main( String[] args )
-    {
-        Params params = new Params();
-        JCommander com = new JCommander( params );
-        try
-        {
-            com.parse( args );
-            String host = params.host;
-            int port = params.port;
-            int localPort = params.localPort;
-
-            JOTLQuerier q = new JOTLQuerier( host, port, localPort, true );
-            println( q.toString() );
-        }
-        catch ( ParameterException ex )
-        {
-            println( String.format( "Parse error: %s", ex.getMessage() ) );
-            com.usage();
-        }
-        catch ( JOTLException ex )
-        {
-            LOG.error( ex.getMessage(), ex );
-            println( ex.getMessage() );
-        }
     }
 }

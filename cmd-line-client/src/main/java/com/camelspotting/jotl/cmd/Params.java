@@ -1,4 +1,4 @@
-package com.camelspotting.jotl.console;
+package com.camelspotting.jotl.cmd;
 
 import com.beust.jcommander.Parameter;
 
