@@ -1,2 +1,32 @@
-syntax: regex
-^target$
+syntax: glob
+
+# general java stuff
+*.class
+*.jar
+*.war
+*.ear
+
+# intellij
+*.iml
+*.ipr
+*.iws
+.idea
+
+# eclipse
+.classpath
+.project
+.settings
+
+# netbeans
+nbproject
+
+# build dirs
+.gradle			# gradle cache dir
+build			# gradle
+out			# intellij
+target			# maven
+bin			# ant
+
+# ant
+local.properties
+.ant-targets-build.xml
