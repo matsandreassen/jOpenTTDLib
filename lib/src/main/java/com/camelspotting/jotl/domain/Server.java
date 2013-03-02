@@ -27,6 +27,11 @@ public class Server
         this( null, ipAddress, port, address );
     }
 
+    public int getPort()
+    {
+        return port;
+    }
+
     public InetAddress getAddress()
     {
         return address;
