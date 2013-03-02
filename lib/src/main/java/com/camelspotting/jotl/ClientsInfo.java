@@ -16,6 +16,7 @@
  */
 package com.camelspotting.jotl;
 
+import com.camelspotting.jotl.parsing.ParseUtil;
 import java.util.Arrays;
 import java.util.Locale;
 import org.slf4j.Logger;
@@ -128,22 +129,22 @@ public final class ClientsInfo
                 this.grfRequests = new GRFRequest[ data[i++] ];
                 for ( int j = 0; j < grfRequests.length; j++ )
                 {
-                    String id = Integer.toHexString( Parser.parse32BitNumber( data, i ) ).toUpperCase();
+                    String id = Integer.toHexString( ParseUtil.parse32BitNumber( data, i ) ).toUpperCase();
                     i += 4;
                     String md5 = "";
                     for ( int k = 0; k < 16; k++ )
                     {
-                        md5 += Parser.parse8BitNumber( data, i++ );
+                        md5 += ParseUtil.parse8BitNumber( data, i++ );
                     }
                     md5 = md5.toUpperCase();
                     grfRequests[j] = new GRFRequest( id, md5 );
                 }
             case 3:
                 LOG.info( "Processing version 3 data." );
-                this.gameDate = Parser.parseDate( Parser.parse32BitNumber( data, i ) );
+                this.gameDate = ParseUtil.parseDate( ParseUtil.parse32BitNumber( data, i ) );
                 LOG.debug( "Game date: {}" , Arrays.toString( gameDate ) );
                 i += 4;
-                this.startDate = Parser.parseDate( Parser.parse32BitNumber( data, i ) );
+                this.startDate = ParseUtil.parseDate( ParseUtil.parse32BitNumber( data, i ) );
                 LOG.debug( "Start date: {}", Arrays.toString( startDate ) );
                 i += 4;
             case 2:
@@ -153,25 +154,25 @@ public final class ClientsInfo
                 this.spectators_max = data[i++];
             case 1:
                 LOG.info( "Processing version 1 data." );
-                int length = Parser.locateNextZero( data, i );
+                int length = ParseUtil.locateNextZero( data, i );
                 LOG.debug( "Server name seems to be {} characters long.", length );
-                this.serverName = Parser.parseString( data, i, length ).trim();
+                this.serverName = ParseUtil.parseString( data, i, length ).trim();
                 i += length + 1;
-                length = Parser.locateNextZero( data, i );
+                length = ParseUtil.locateNextZero( data, i );
                 LOG.debug( "Revision seems to be {} characters long.", length );
-                this.revision = Parser.parseVersion( Parser.parseString( data, i, length ).trim() );
+                this.revision = ParseUtil.parseVersion( ParseUtil.parseString( data, i, length ).trim() );
                 i += length + 1;
                 this.serverLang = data[i++];
                 this.password_protected = data[i++] == 1;
                 this.clients_max = data[i++];
                 this.clients_on = data[i++];
                 this.spectators_on = data[i++];
-                length = Parser.locateNextZero( data, i );
-                this.map_name = Parser.parseString( data, i, length ).trim();
+                length = ParseUtil.locateNextZero( data, i );
+                this.map_name = ParseUtil.parseString( data, i, length ).trim();
                 i += length + 1;
-                this.map_width = Parser.parse16BitNumber( data, i );
+                this.map_width = ParseUtil.parse16BitNumber( data, i );
                 i += 2;
-                this.map_height = Parser.parse16BitNumber( data, i );
+                this.map_height = ParseUtil.parse16BitNumber( data, i );
                 i += 2;
                 this.tileset = data[i++];
                 this.dedicated = ( data[i++] == 1 );
@@ -189,7 +190,7 @@ public final class ClientsInfo
         LOG.debug( "Parsing GRF names." );
         int i = 0;
         int oldCount = grfRequests.length;
-        int newCount = Parser.parse8BitNumber( data, i++ );
+        int newCount = ParseUtil.parse8BitNumber( data, i++ );
 
         // Expand the GRFRequest array
         GRFRequest[] newArray = new GRFRequest[ oldCount + newCount ];
@@ -198,16 +199,16 @@ public final class ClientsInfo
 
         for ( int j = oldCount; j < ( oldCount + newCount ); j++ )
         {
-            String id = Integer.toHexString( Parser.parse8BitNumber( data, i++ ) ).toUpperCase();
+            String id = Integer.toHexString( ParseUtil.parse8BitNumber( data, i++ ) ).toUpperCase();
             String md5 = "";
             for ( int k = 0; k < 16; k++ )
             {
-                md5 += Parser.parse32BitNumber( data, i );
+                md5 += ParseUtil.parse32BitNumber( data, i );
                 i += 4;
             }
             md5 = md5.toUpperCase();
-            int length = Parser.locateNextZero( data, i );
-            String name = Parser.parseString( data, i, length );
+            int length = ParseUtil.locateNextZero( data, i );
+            String name = ParseUtil.parseString( data, i, length );
             i += length + 1;
             grfRequests[j] = new GRFRequest( id, md5, name );
         }
@@ -278,7 +279,7 @@ public final class ClientsInfo
      */
     public String getLongStartDate()
     {
-        return Parser.getLongDate( startDate, Locale.UK );
+        return ParseUtil.getLongDate( startDate, Locale.UK );
     }
 
     /**
@@ -289,7 +290,7 @@ public final class ClientsInfo
      */
     public String getShortStartDate()
     {
-        return Parser.getShortDate( startDate, Locale.UK );
+        return ParseUtil.getShortDate( startDate, Locale.UK );
     }
 
     /**
@@ -311,7 +312,7 @@ public final class ClientsInfo
      */
     public String getLongGameDate()
     {
-        return Parser.getLongDate( gameDate, Locale.UK );
+        return ParseUtil.getLongDate( gameDate, Locale.UK );
     }
 
     /**
@@ -322,7 +323,7 @@ public final class ClientsInfo
      */
     public String getShortGameDate()
     {
-        return Parser.getShortDate( gameDate, Locale.UK );
+        return ParseUtil.getShortDate( gameDate, Locale.UK );
     }
 
     /**

@@ -16,6 +16,7 @@
  */
 package com.camelspotting.jotl;
 
+import com.camelspotting.jotl.parsing.ParseUtil;
 import java.util.Arrays;
 import java.util.Locale;
 
@@ -112,7 +113,7 @@ public final class Client implements Comparable<Client>
      */
     public String getLongJoinDate()
     {
-        return Parser.getLongDate( joinDate, Locale.UK );
+        return ParseUtil.getLongDate( joinDate, Locale.UK );
     }
 
     /**
@@ -122,7 +123,7 @@ public final class Client implements Comparable<Client>
      */
     public String getShortJoinDate()
     {
-        return Parser.getShortDate( joinDate, Locale.UK );
+        return ParseUtil.getShortDate( joinDate, Locale.UK );
     }
 
     /**

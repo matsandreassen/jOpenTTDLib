@@ -14,7 +14,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package com.camelspotting.jotl;
+package com.camelspotting.jotl.parsing;
 
 import com.camelspotting.jotl.domain.Server;
 import java.net.InetAddress;
@@ -34,13 +34,13 @@ import org.slf4j.LoggerFactory;
  * @author Mats Andreassen
  * @version 1.0
  */
-public final class Parser
+public final class ParseUtil
 {
 
     /**
      * The logger object for this class
      */
-    private static final Logger LOG = LoggerFactory.getLogger( Parser.class );
+    private static final Logger LOG = LoggerFactory.getLogger( ParseUtil.class );
     /**
      * The pattern for matching an IPv4 address.
      */
@@ -54,7 +54,7 @@ public final class Parser
      * This constructor is only here to prevent this class from being
      * instantiated.
      */
-    private Parser()
+    private ParseUtil()
     {
     }
 
@@ -64,7 +64,7 @@ public final class Parser
      * @param version the version to parse
      * @return e.g.: { 0, 5, 3}
      */
-    static int[] parseVersion( String version )
+    public static int[] parseVersion( String version )
     {
         String[] A = version.split( "\\." );
         int[] B = new int[ A.length ];
@@ -157,7 +157,7 @@ public final class Parser
      * @param offset where to start
      * @return the number.
      */
-    static long parse64BitNumber( byte[] input, int offset )
+    public static long parse64BitNumber( byte[] input, int offset )
     {
         long[] data = getUnsigned64BitValues( input, offset );
         long i = data[0];
@@ -179,7 +179,7 @@ public final class Parser
      * @param offset where to start
      * @return the number.
      */
-    static int parse32BitNumber( byte[] input, int offset )
+    public static int parse32BitNumber( byte[] input, int offset )
     {
         int[] data = getUnsigned32BitValues( input, offset );
         int i = data[0];
@@ -197,7 +197,7 @@ public final class Parser
      * @param offset where to start
      * @return the number.
      */
-    static int parse16BitNumber( byte[] input, int offset )
+    public static int parse16BitNumber( byte[] input, int offset )
     {
         int[] data = getUnsigned16BitValues( input, offset );
         int i = data[0];
@@ -223,7 +223,7 @@ public final class Parser
      * @param offset where to start
      * @return the number.
      */
-    static int parse8BitNumber( byte[] input, int offset )
+    public static int parse8BitNumber( byte[] input, int offset )
     {
         // Parse 1 byte
         return toUnsignedInt( input[offset] );
@@ -236,7 +236,7 @@ public final class Parser
      * @param offset where to start
      * @return the length to the location
      */
-    static int locateNextZero( byte[] data, int offset )
+    public static int locateNextZero( byte[] data, int offset )
     {
         int length = 0;
         while ( data[offset++] != 0 )
@@ -255,7 +255,7 @@ public final class Parser
      * @param length where to finish
      * @return the finished {@link String}
      */
-    static String parseString( byte[] data, int offset, int length )
+    public static String parseString( byte[] data, int offset, int length )
     {
         return new String( data, offset, length );
     }
@@ -266,7 +266,7 @@ public final class Parser
      * @param date the 32-bit date from OpenTTD
      * @return an array containing day, month, year
      */
-    static int[] parseDate( int date )
+    public static int[] parseDate( int date )
     {
         // Year determination in multiple steps to account for leap
         // years. First do the large steps, then the smaller ones.
@@ -342,7 +342,7 @@ public final class Parser
      * @return an {@link InetAddress}-object
      * @throws java.net.UnknownHostException
      */
-    static Server parseHost( String host ) throws UnknownHostException
+    public static Server parseHost( String host ) throws UnknownHostException
     {
         if ( Pattern.matches( ipv4Pattern, host ) )
         {
@@ -415,7 +415,7 @@ public final class Parser
      * @param date the date to parse
      * @return the formatted string
      */
-    static String getShortDate( int[] date, Locale loc )
+    public static String getShortDate( int[] date, Locale loc )
     {
         return new StringBuilder( new DateFormatSymbols( loc ).getShortMonths()[date[1]] ).append( " " ).append( date[0] ).append( " " ).append( date[2] ).toString();
     }
@@ -426,7 +426,7 @@ public final class Parser
      * @param date the date to parse
      * @return the formatted string
      */
-    static String getLongDate( int[] date, Locale loc )
+    public static String getLongDate( int[] date, Locale loc )
     {
         return new StringBuilder( new DateFormatSymbols( loc ).getMonths()[date[1]] ).append( " " ).append( date[0] ).append( " " ).append( date[2] ).toString();
     }

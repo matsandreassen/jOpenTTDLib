@@ -16,6 +16,7 @@
  */
 package com.camelspotting.jotl;
 
+import com.camelspotting.jotl.parsing.ParseUtil;
 import com.camelspotting.jotl.domain.Server;
 import java.io.IOException;
 import java.net.BindException;
@@ -72,7 +73,7 @@ public final class JOTLQuerier implements Comparable<JOTLQuerier>
     /**
      * One of the objects that will contain gathered information
      */
-    private Clients serverResponseInfo;
+    private ClientsInfo serverResponseInfo;
     /**
      * One of the objects that will contain gathered information
      */
@@ -180,7 +181,7 @@ public final class JOTLQuerier implements Comparable<JOTLQuerier>
         this.destPort = destPort;
         try
         {
-            this.server = Parser.parseHost( host );
+            this.server = ParseUtil.parseHost( host );
             byte[] data = testConfiguration( server, fromPort, destPort, 2000 );
             if ( data == null )
             {
@@ -342,7 +343,7 @@ public final class JOTLQuerier implements Comparable<JOTLQuerier>
         {
             case SERVER_RESPONSE:
                 LOG.info( "Parsing server response information." );
-                this.serverResponseInfo = new Clients( data );
+                this.serverResponseInfo = new ClientsInfo( data );
                 LOG.info( "Server response information parsed." );
                 break;
             case SERVER_DETAIL_INFO:
@@ -406,7 +407,7 @@ public final class JOTLQuerier implements Comparable<JOTLQuerier>
      * @return the current {@link ClientsInfo} object or null if no info has
      * been collected
      */
-    public Clients getServerResponseInfo()
+    public ClientsInfo getServerResponseInfo()
     {
         return serverResponseInfo;
     }
