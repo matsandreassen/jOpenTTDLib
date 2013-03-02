@@ -47,6 +47,6 @@ public enum Station
                 return s;
             }
         }
-        return null;
+        throw new IllegalArgumentException( String.format( "Unsupported station type: {}.", id ) );
     }
 }

@@ -10,7 +10,7 @@ public enum Vehicle
 
     TRAIN( 0, "Train" ),
     TRUCK( 1, "Truck" ),
-    BUS( 2, "BUS" ),
+    BUS( 2, "Bus" ),
     AIRCRAFT( 3, "Aircraft" ),
     SHIP( 4, "Ship" );
     private int id;
@@ -47,6 +47,6 @@ public enum Vehicle
                 return v;
             }
         }
-        return null;
+        throw new IllegalArgumentException( String.format( "Unsupported vehicle type: {}.", id ) );
     }
 }
