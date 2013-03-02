@@ -16,6 +16,7 @@
  */
 package com.camelspotting.jotl;
 
+import com.camelspotting.jotl.domain.Client;
 import com.camelspotting.jotl.parsing.ParseUtil;
 import com.camelspotting.jotl.parsing.Station;
 import com.camelspotting.jotl.parsing.Vehicle;
