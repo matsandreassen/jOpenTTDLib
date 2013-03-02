@@ -25,11 +25,13 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This is one of the primary access points for any user of the library. It's
- * for being used to monitor an ongoing OpenTTD-server and it's games. It can do
- * updates continously or manually.
+ * for monitoring an ongoing OpenTTD game. It can do updates continously or
+ * manually.
  *
  * @author Mats Andreassen
  * @version 1.0
@@ -37,6 +39,7 @@ import java.util.List;
 public class ServerHandler
 {
 
+    private static final Logger LOG = LoggerFactory.getLogger( ServerHandler.class );
     /**
      * The listeners that are to be notified of events
      */
@@ -97,7 +100,6 @@ public class ServerHandler
      * The game is paused
      */
     private boolean paused = false;
-    private boolean debug = false;
 
     /**
      * Main constructor for creating the server handler. Be aware that if you
@@ -229,7 +231,7 @@ public class ServerHandler
                             if ( lastUpdateFailed )
                             {
                                 updateSlow();
-                                printDebugMessage( "5000 millisecond update rate fallback succeeded. Returning to " + updateInterval + "." );
+                                LOG.debug( "5000 millisecond update rate fallback succeeded. Returning to " + updateInterval + "." );
                                 lastUpdateFailed = false;
                                 timeouts = 0;
                             }
@@ -252,20 +254,20 @@ public class ServerHandler
                         {
                             if ( ++timeouts < maxTimouts )
                             {
-                                printDebugMessage( "Timeout " + timeouts + "occured. A new game may be loading." );
+                                LOG.debug( "Timeout {} occured. A new game may be loading.", timeouts );
                                 lastUpdateFailed = true;
                             }
                             else
                             {
-                                printDebugMessage( "The maximum number of timeouts in a row(" + maxTimouts + ") been reached. Server may have gone down." );
+                                LOG.debug( "The maximum number of timeouts in a row({}) has been reached. Server may have gone down.", maxTimouts );
                                 setUpdateInterval( -1 );
                                 fireEvent( new OpenTTDEvent( OpenTTDEventType.LOST_CONNECTION ) );
-                                printDebugMessage( "Manual update mode has been set and any and all listeners have been notified." );
+                                LOG.debug( "Manual update mode has been set and any and all listeners have been notified." );
                             }
                         }
                     }
                 }
-                printDebugMessage( "Update thread death." );
+                LOG.debug( "Update thread death." );
             }
 
             private void updateNormal() throws InterruptedException, JOTLException
@@ -318,7 +320,7 @@ public class ServerHandler
     {
         List<OpenTTDEvent> evts = new ArrayList<OpenTTDEvent>();
         // Let's see if anything interesting has happened since last time
-        printDebugMessage( "Let's check this new update for changes." );
+        LOG.debug( "Let's check this new update for changes." );
         boolean isSameGame = representsSameGame( lastUpdate, currentUpdate );
         List<Company> lastList = ( lastUpdate != null ? lastUpdate.getServerDetailedInfo().getCompanies() : null );
         List<Company> curList = currentUpdate.getServerDetailedInfo().getCompanies();
@@ -331,7 +333,7 @@ public class ServerHandler
             if ( diff < 0 )
             {
                 // This is not a "new" game, but a game in progress
-                printDebugMessage( "I found out a 'new game' was acually a game in progress." );
+                LOG.debug( "I found out a 'new game' was acually a game in progress." );
                 newgame = new OpenTTDEvent( OpenTTDEventType.GAME_IN_PROGRESS, Integer.valueOf( currentUpdate.getServerResponseInfo().getGameDate()[2] ) );
             }
         }
@@ -443,7 +445,7 @@ public class ServerHandler
         }
         else
         {
-            printDebugMessage( "No new events were found." );
+            LOG.debug( "No new events were found." );
         }
         doFinalBookkeeping();
     }
@@ -462,7 +464,7 @@ public class ServerHandler
                 diff = second[0] - first[0]; // Day
             }
         }
-        String sign = null;
+        String sign;
         if ( diff > 0 )
         {
             sign = ">";
@@ -475,7 +477,7 @@ public class ServerHandler
         {
             sign = "<";
         }
-        printDebugMessage( "Comparing dates: " + Arrays.toString( second ) + " " + sign + " " + Arrays.toString( first ) );
+        LOG.debug( "Comparing dates: {} {} {}", Arrays.toString( second ), sign, Arrays.toString( first ) );
         return diff;
     }
 
@@ -545,16 +547,16 @@ public class ServerHandler
         List<OpenTTDEvent> evts = new ArrayList<OpenTTDEvent>();
         for ( Client client : newList )
         {
-            printDebugMessage( "Checking " + client + "." );
+            LOG.debug( "Checking {}.", client );
             if ( !client.isSpectator() )
             {
                 if ( oldList.contains( client ) )
                 {
-                    printDebugMessage( client + " was already playing." );
+                    LOG.debug( "{} was already playing.", client );
                 }
                 else
                 {
-                    printDebugMessage( client + " is new! Generating event." );
+                    LOG.debug( "{} is new! Generating event.", client );
                     evts.add( new OpenTTDEvent( OpenTTDEventType.CLIENT_JOIN, client ) );
                 }
             }
@@ -577,29 +579,29 @@ public class ServerHandler
         {
             if ( paused )
             {
-                printDebugMessage( "Has the game started again?" );
+                LOG.debug( "Has the game started again?" );
                 if ( compareDates( lastUpdate, currentUpdate ) > 0 )
                 {
                     if ( --pauseCounter == 0 )
                     {
-                        printDebugMessage( "Decremented the pause test counter to " + pauseCounter + "." );
-                        printDebugMessage( "Yes it has!" );
+                        LOG.debug( "Decremented the pause test counter to {}.", pauseCounter );
+                        LOG.debug( "Yes it has!" );
                         paused = false;
                         unpauseCounter = 0;
                         evt = new OpenTTDEvent( OpenTTDEventType.UNPAUSED, Integer.valueOf( currentUpdate.getServerResponseInfo().getGameDate()[2] ) );
                     }
                 }
-                printDebugMessage( "No it hasn't." );
+                LOG.debug( "No it hasn't." );
             }
             else
             {
-                printDebugMessage( "Has the game paused?" );
+                LOG.debug( "Has the game paused?" );
                 if ( compareDates( lastUpdate, currentUpdate ) == 0 )
                 {
                     if ( ++unpauseCounter == 3 )
                     {
-                        printDebugMessage( "Incremented the pause test counter to " + unpauseCounter + "." );
-                        printDebugMessage( "Yes it has!" );
+                        LOG.debug( "Incremented the pause test counter to {}.", unpauseCounter );
+                        LOG.debug( "Yes it has!" );
                         paused = true;
                         pauseCounter = 1;
                         evt = new OpenTTDEvent( OpenTTDEventType.PAUSED, Integer.valueOf( currentUpdate.getServerResponseInfo().getGameDate()[2] ) );
@@ -607,8 +609,7 @@ public class ServerHandler
                 }
                 else
                 {
-                    printDebugMessage( "No it hasn't." );
-                    printDebugMessage( "Resetting the pauseCounter." );
+                    LOG.debug( "No it hasn't. Resetting the pauseCounter." );
                     unpauseCounter = 0;
                 }
             }
@@ -636,7 +637,7 @@ public class ServerHandler
         // Is the first game?
         if ( lastUpdate == null )
         {
-            printDebugMessage( "Comparing games: this is the first game I've seen." );
+            LOG.debug( "Comparing games: this is the first game I've seen." );
             return false;
         }
 
@@ -648,35 +649,35 @@ public class ServerHandler
         // Check terrain type
         if ( sriOld.getTileset() != sriNew.getTileset() )
         {
-            printDebugMessage( "Comparing games: different tilesets found." );
+            LOG.debug( "Comparing games: different tilesets found." );
             return false;
         }
         // Check number of new graphics
         if ( sriOld.getGraphicsCount() != sriNew.getGraphicsCount() )
         {
-            printDebugMessage( "Comparing games: different graphic count found." );
+            LOG.debug( "Comparing games: different graphic count found." );
             return false;
         }
         // Check max number of companies, clients and spectators
         if ( sriOld.getMaxNumberOfClients() != sriNew.getMaxNumberOfClients() )
         {
-            printDebugMessage( "Comparing games: different max number of clients found." );
+            LOG.debug( "Comparing games: different max number of clients found." );
             return false;
         }
         if ( sriOld.getMaxNumberOfCompanies() != sriNew.getMaxNumberOfCompanies() )
         {
-            printDebugMessage( "Comparing games: different max number of companies found." );
+            LOG.debug( "Comparing games: different max number of companies found." );
             return false;
         }
         if ( sriOld.getMaxNumberOfSpectators() != sriNew.getMaxNumberOfSpectators() )
         {
-            printDebugMessage( "Comparing games: different max number of spectators found." );
+            LOG.debug( "Comparing games: different max number of spectators found." );
             return false;
         }
         // Check map size
         if ( sriOld.getMapHeight() != sriNew.getMapHeight() || sriOld.getMapWidth() != sriNew.getMapWidth() )
         {
-            printDebugMessage( "Comparing games: different maps.ize found." );
+            LOG.debug( "Comparing games: different maps.ize found." );
             return false;
         }
         // Check startdate
@@ -686,7 +687,7 @@ public class ServerHandler
         {
             if ( d1[i] != d2[i] )
             {
-                printDebugMessage( "Comparing games: different start dates found." );
+                LOG.debug( "Comparing games: different start dates found." );
                 return false;
             }
         }
@@ -695,7 +696,7 @@ public class ServerHandler
         d2 = sriNew.getGameDate();
         if ( compareDates( d1, d2 ) < 0 )
         {
-            printDebugMessage( "Comparing games: new game has lower game date than the old game." );
+            LOG.debug( "Comparing games: new game has lower game date than the old game." );
             return false;
         }
         // Check language
@@ -703,7 +704,7 @@ public class ServerHandler
         int[] v2 = sriNew.getVersion();
         if ( sriOld.getServerLanguage() != sriNew.getServerLanguage() )
         {
-            printDebugMessage( "Comparing games: different server languages found." );
+            LOG.debug( "Comparing games: different server languages found." );
             return false;
         }
         // Check server version
@@ -711,19 +712,19 @@ public class ServerHandler
         {
             if ( v1[i] != v2[i] )
             {
-                printDebugMessage( "Comparing games: different server version found." );
+                LOG.debug( "Comparing games: different server version found." );
                 return false;
             }
         }
         // Check dedication^^
         if ( sriOld.isDedicated() != sriNew.isDedicated() )
         {
-            printDebugMessage( "Comparing games: different dedicated status." );
+            LOG.debug( "Comparing games: different dedicated status." );
             return false;
         }
         // Ok, so far so good. All immutable ServerResponse info has been
         // matched.
-        printDebugMessage( "Comparing games: Same game, as far as I know." );
+        LOG.debug( "Comparing games: Same game, as far as I know." );
         return true;
     }
 
@@ -915,7 +916,7 @@ public class ServerHandler
      */
     private void fireEvents( List<OpenTTDEvent> evts )
     {
-        printDebugMessage( "Firing " + evts + " events" );
+        LOG.debug( "Firing events: {}.", evts );
         if ( listeners != null )
         {
             for ( OpenTTDEvent evt : evts )
@@ -933,7 +934,7 @@ public class ServerHandler
     {
         for ( OpenTTDListener otl : listeners )
         {
-            printDebugMessage( "'" + otl + "' has been notified of event: '" + evt + "'." );
+            LOG.debug( "'{}' has been notified of event: ''.", otl, evt );
             otl.eventOccured( evt );
         }
     }
@@ -951,7 +952,7 @@ public class ServerHandler
         }
         for ( OpenTTDListener otl : otls )
         {
-            printDebugMessage( "Adding listener " + otl + "." );
+            LOG.debug( "Adding listener {}.", otl );
             listeners.add( otl );
         }
     }
@@ -969,14 +970,6 @@ public class ServerHandler
             {
                 listeners.remove( otl );
             }
-        }
-    }
-
-    private void printDebugMessage( String msg )
-    {
-        if ( debug )
-        {
-            System.out.println( "ServerHandler: " + msg );
         }
     }
 }
