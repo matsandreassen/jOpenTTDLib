@@ -110,7 +110,7 @@ public final class JOTLQuerier implements Comparable<JOTLQuerier>
             socket = new DatagramSocket( localPort );
             socket.setSoTimeout( timeout );
             LOG.info( "Pinging OpenTTD server at {}.", addr.getHostAddress() );
-            socket.send( SendablePacketType.CLIENT_FIND_SERVER.createPacket( addr, destPort ) );
+            socket.send( PacketType.CLIENT_FIND_SERVER.createPacket( addr, destPort ) );
             DatagramPacket dp = new DatagramPacket( new byte[ maxPacketSize ], maxPacketSize );
             socket.receive( dp );
             LOG.info( "We got a reply! There is most definitely something there." );
@@ -188,7 +188,7 @@ public final class JOTLQuerier implements Comparable<JOTLQuerier>
             else if ( queryInfo )
             {
                 recieve( data );
-                queryRest( SendablePacketType.CLIENT_FIND_SERVER );
+                queryRest( PacketType.CLIENT_FIND_SERVER );
             }
         }
         catch ( UnknownHostException ex )
@@ -257,7 +257,7 @@ public final class JOTLQuerier implements Comparable<JOTLQuerier>
      * @param pt the type of {@link SendablePacketType} to send
      * @throws com.camelspotting.openttd.JOTLException
      */
-    public void query( SendablePacketType pt ) throws JOTLException
+    public void query( PacketType pt ) throws JOTLException
     {
         LOG.trace( "query(packet={})", pt );
         if ( !writable )
@@ -328,7 +328,7 @@ public final class JOTLQuerier implements Comparable<JOTLQuerier>
             data = trimPacket( recieved.getData(), recieved.getLength() );
         }
 
-        RecievablePacketType type = RecievablePacketType.getEnum( data[2] );
+        PacketType type = PacketType.fromInt( data[2] );
 
         StringBuilder sb = new StringBuilder( "Recieved packet!" );
         sb.append( "\n\tPacket Type " ).append( type ).append( ":" );
@@ -354,6 +354,8 @@ public final class JOTLQuerier implements Comparable<JOTLQuerier>
                 serverResponseInfo.parseGRFNames( data );
                 LOG.info( "NewGRFs information parsed." );
                 break;
+            default:
+                throw new UnsupportedOperationException( String.format( "Unsupported packet type received: %s", type ) );
         }
     }
 
@@ -380,15 +382,15 @@ public final class JOTLQuerier implements Comparable<JOTLQuerier>
             throw new JOTLException( "The program has disallowed this operation at this point." );
         }
 
-        for ( SendablePacketType spt : SendablePacketType.values() )
+        for ( PacketType spt : PacketType.values() )
         {
             query( spt );
         }
     }
 
-    private void queryRest( SendablePacketType exceptThisOne ) throws JOTLException
+    private void queryRest( PacketType exceptThisOne ) throws JOTLException
     {
-        for ( SendablePacketType spt : SendablePacketType.values() )
+        for ( PacketType spt : PacketType.values() )
         {
             if ( spt != exceptThisOne )
             {

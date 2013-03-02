@@ -31,34 +31,81 @@ import java.net.InetAddress;
  * @version 1.0
  * @see RecievablePacketType
  */
-public enum SendablePacketType
+public enum PacketType
 {
 
     /**
      * Queries a game server for game information
      */
-    CLIENT_FIND_SERVER( 0 ),
+    CLIENT_FIND_SERVER( 0, PacketOrigin.CLIENT ),
+    /**
+     * Reply of the game server with game information
+     */
+    SERVER_RESPONSE( 1, PacketOrigin.SERVER ),
     /**
      * Queries a game server about details of the game, such as companies
      */
-    CLIENT_DETAIL_INFO( 2 );
-    //SERVER_REGISTER(4),       // Packet to register itself to the master server
-    //CLIENT_GET_LIST(6),       // Request for serverlist from master server
-    //SERVER_UNREGISTER(8),     // Request to be removed from the server-list
-    //CLIENT_GET_NEWGRFS(9);      // Requests the names for a list of GRFs (GRF_ID and MD5)
+    CLIENT_DETAIL_INFO( 2, PacketOrigin.CLIENT ),
+    /**
+     * Reply from the game server about details of the game, such as companies
+     */
+    SERVER_DETAIL_INFO( 3, PacketOrigin.SERVER ),
+    /**
+     * Packet to register itself to the master server
+     */
+    SERVER_REGISTER( 4, PacketOrigin.SERVER ),
+    /**
+     * Packet indicating registration has succedeed
+     */
+    MASTER_ACK_REGISTER( 5, PacketOrigin.MASTER_SERVER ),
+    /**
+     * Request for serverlist from master server
+     */
+    CLIENT_GET_LIST( 6, PacketOrigin.CLIENT ),
+    /**
+     * Response from master server with server ip's + port's
+     */
+    MASTER_RESPONSE_LIST( 7, PacketOrigin.MASTER_SERVER ),
+    /**
+     * Request to be removed from the server-list
+     */
+    SERVER_UNREGISTER( 8, PacketOrigin.SERVER ),
+    /**
+     * Requests the names for a list of GRFs (GRF_ID and MD5)
+     */
+    CLIENT_GET_NEWGRFS( 9, PacketOrigin.CLIENT ),
+    /**
+     * Sends the list of NewGRF's requested.
+     */
+    SERVER_NEWGRFS( 10, PacketOrigin.SERVER );
     /**
      * Value sent to the OpenTTD-server to indicate type of package
      */
-    private int value;
+    private final int value;
+    /**
+     * Where does this packet type come from?
+     */
+    private final PacketOrigin packetOrigin;
 
     /**
      * Smple constructor.
      *
      * @param value the final byte for the packet
      */
-    private SendablePacketType( int value )
+    private PacketType( int value, PacketOrigin packetOrigin )
     {
         this.value = value;
+        this.packetOrigin = packetOrigin;
+    }
+
+    /**
+     * Where does this packet type come from?
+     *
+     * @return
+     */
+    public PacketOrigin getPacketOrigin()
+    {
+        return packetOrigin;
     }
 
     /**
@@ -77,5 +124,23 @@ public enum SendablePacketType
             (byte) 3, (byte) 0, (byte) value
         };
         return new DatagramPacket( q, q.length, address, destPort );
+    }
+
+    public static PacketType fromInt( int value )
+    {
+        for ( PacketType pt : values() )
+        {
+            if ( pt.value == value )
+            {
+                return pt;
+            }
+        }
+        throw new IllegalArgumentException( String.format( "Unknown packet type: %d", value ) );
+    }
+
+    public static enum PacketOrigin
+    {
+
+        MASTER_SERVER, SERVER, CLIENT;
     }
 }
