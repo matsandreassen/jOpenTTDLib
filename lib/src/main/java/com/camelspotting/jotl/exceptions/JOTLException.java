@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package com.camelspotting.jotl;
+package com.camelspotting.jotl.exceptions;
 
 /**
  * All exceptions that happen in the code are wrapped inside OpenTTD-exceptions.
@@ -25,7 +25,7 @@ package com.camelspotting.jotl;
  * @author Mats Andressen
  * @version 1.0
  */
-public final class JOTLException extends Exception
+public class JOTLException extends Exception
 {
 
     /**
@@ -41,9 +41,9 @@ public final class JOTLException extends Exception
     /**
      * Simple constructor with no message.
      */
-    public JOTLException()
+    public JOTLException( Throwable cause )
     {
-        super();
+        super( cause );
     }
 
     /**

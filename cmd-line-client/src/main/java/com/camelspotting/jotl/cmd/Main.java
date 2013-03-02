@@ -2,8 +2,10 @@ package com.camelspotting.jotl.cmd;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.ParameterException;
-import com.camelspotting.jotl.JOTLException;
-import com.camelspotting.jotl.JOTLQuerier;
+import com.camelspotting.jotl.GameQuerier;
+import com.camelspotting.jotl.exceptions.JOTLException;
+import com.camelspotting.jotl.UDPGameQuerier;
+import com.camelspotting.jotl.domain.Game;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,8 +33,9 @@ public class Main
             int port = params.port;
             int localPort = params.localPort;
 
-            JOTLQuerier q = new JOTLQuerier( host, localPort, port, true );
-            println( q.toString() );
+            GameQuerier q = new UDPGameQuerier( host, localPort, port );
+            Game game = q.getAllInformation();
+            println( game.toString() );
         }
         catch ( ParameterException ex )
         {

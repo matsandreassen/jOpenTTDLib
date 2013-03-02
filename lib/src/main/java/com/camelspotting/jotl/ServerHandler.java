@@ -16,13 +16,12 @@
  */
 package com.camelspotting.jotl;
 
+import com.camelspotting.jotl.domain.Game;
+import com.camelspotting.jotl.exceptions.JOTLException;
 import com.camelspotting.jotl.domain.Client;
-import com.camelspotting.jotl.parsing.ParseUtil;
-import com.camelspotting.jotl.domain.Server;
 import com.camelspotting.jotl.event.OpenTTDEvent;
 import com.camelspotting.jotl.event.OpenTTDEventType;
 import com.camelspotting.jotl.event.OpenTTDListener;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -46,10 +45,6 @@ public class ServerHandler
      */
     private List<OpenTTDListener> listeners;
     /**
-     * The host being monitored
-     */
-    private Server monitoredServer;
-    /**
      * The update interval in milliseconds
      */
     private int updateInterval;
@@ -60,31 +55,23 @@ public class ServerHandler
     /**
      * The previous update
      */
-    private JOTLQuerier lastUpdate;
+    private Game lastUpdate;
     /**
      * The current update
      */
-    private JOTLQuerier currentUpdate;
-    /**
-     * The local port
-     */
-    private int fromPort;
-    /**
-     * The remote port
-     */
-    private int destPort;
+    private Game currentUpdate;
     /**
      * Has electric rail been made available?
      */
-    private boolean electricRail = false;
+    private boolean electricRail;
     /**
      * Has monorail been made available?
      */
-    private boolean monoRail = false;
+    private boolean monoRail;
     /**
      * Has maglev been made available?
      */
-    private boolean maglev = false;
+    private boolean maglev;
     /**
      * The newest companies
      */
@@ -101,6 +88,7 @@ public class ServerHandler
      * The game is paused
      */
     private boolean paused = false;
+    private final GameQuerier gameQuerier;
 
     /**
      * Main constructor for creating the server handler. Be aware that if you
@@ -120,38 +108,15 @@ public class ServerHandler
      * @param otls any initial listeners?
      * @see #start()
      */
-    public ServerHandler( String host, int localPort, int remotePort, int updateInterval, boolean updateNow, OpenTTDListener... otls ) throws UnknownHostException, JOTLException
+    public ServerHandler( GameQuerier gameQuerier, int updateInterval, boolean updateNow, OpenTTDListener... otls ) throws JOTLException
     {
-        this.monitoredServer = ParseUtil.parseHost( host, remotePort );
         this.updateInterval = updateInterval;
-        this.fromPort = localPort;
-        this.destPort = remotePort;
         addOpenTTDListeners( otls ); // This will do nothing if otl is null
         if ( updateNow )
         {
             update();
         }
-    }
-
-    /**
-     * Convenience constructor for creating the server handler. Be aware that if
-     * you supply no initial listeners and still tell it to update once
-     * immidiately no one will receive any events. Regardless of what you supply
-     * as an update interval it will not start and continous sequence without a
-     * call to start(). Standard ports, local 2222 and remote 3979 is used.
-     * NOTE: According to the OpenTTD-code a day is about 2 seconds if the
-     * machine running it is able to do run it normally.
-     *
-     * @param host the server to monitor
-     * @param updateInterval update interval in milliseconds, 0 or less for
-     * manual
-     * @param updateNow do an update right away?
-     * @param otls any initial listeners?
-     * @see #start()
-     */
-    public ServerHandler( String host, int updateInterval, boolean updateNow, OpenTTDListener... otls ) throws UnknownHostException, JOTLException
-    {
-        this( host, 2222, 3979, updateInterval, updateNow, otls );
+        this.gameQuerier = gameQuerier;
     }
 
     /**
@@ -173,7 +138,7 @@ public class ServerHandler
      */
     public String getServerName()
     {
-        return monitoredServer.getAddress().getCanonicalHostName();
+        return gameQuerier.getServer().getAddress().getCanonicalHostName();
     }
 
     /**
@@ -309,7 +274,7 @@ public class ServerHandler
      */
     public final synchronized void update() throws JOTLException
     {
-        currentUpdate = new JOTLQuerier( monitoredServer, fromPort, destPort, true );
+        currentUpdate = gameQuerier.getAllInformation();
         checkForEvents();
     }
 
@@ -323,19 +288,19 @@ public class ServerHandler
         // Let's see if anything interesting has happened since last time
         LOG.debug( "Let's check this new update for changes." );
         boolean isSameGame = representsSameGame( lastUpdate, currentUpdate );
-        List<Company> lastList = ( lastUpdate != null ? lastUpdate.getServerDetailedInfo().getCompanies() : null );
-        List<Company> curList = currentUpdate.getServerDetailedInfo().getCompanies();
+        List<Company> lastList = ( lastUpdate != null ? lastUpdate.getServerInfo().getCompanies() : null );
+        List<Company> curList = currentUpdate.getServerInfo().getCompanies();
 
         // Has a new game started?
         OpenTTDEvent newgame = checkForNewGame( isSameGame, currentUpdate );
         if ( newgame != null )
         {
-            int diff = compareDates( currentUpdate.getServerResponseInfo().getGameDate(), currentUpdate.getServerResponseInfo().getStartDate() );
+            int diff = compareDates( currentUpdate.getClientsInfo().getGameDate(), currentUpdate.getClientsInfo().getStartDate() );
             if ( diff < 0 )
             {
                 // This is not a "new" game, but a game in progress
                 LOG.debug( "I found out a 'new game' was acually a game in progress." );
-                newgame = new OpenTTDEvent( OpenTTDEventType.GAME_IN_PROGRESS, Integer.valueOf( currentUpdate.getServerResponseInfo().getGameDate()[2] ) );
+                newgame = new OpenTTDEvent( OpenTTDEventType.GAME_IN_PROGRESS, Integer.valueOf( currentUpdate.getClientsInfo().getGameDate()[2] ) );
             }
         }
         OpenTTDEvent endgame = checkForEndGame( isSameGame );
@@ -372,7 +337,7 @@ public class ServerHandler
             // A new game didn't start but we still have to see what
             // happens.
             // Has any type of new rail been made available?
-            OpenTTDEvent railEvent = checkForNewRail( currentUpdate.getServerResponseInfo().getGameDate()[2] );
+            OpenTTDEvent railEvent = checkForNewRail( currentUpdate.getClientsInfo().getGameDate()[2] );
 
             // Do we have a new leader?
             OpenTTDEvent newLeader = checkForNewLeader( lastList, curList );
@@ -381,7 +346,7 @@ public class ServerHandler
             // Has the game been paused/unpaused?
             OpenTTDEvent pause = checkForPauseUnpaused( isSameGame );
             // Has any company been removed
-            List<OpenTTDEvent> removedEvents = checkForRemovedCompanies( isSameGame, lastUpdate.getServerDetailedInfo().getCompanies(), currentUpdate.getServerDetailedInfo().getCompanies() );
+            List<OpenTTDEvent> removedEvents = checkForRemovedCompanies( isSameGame, lastUpdate.getServerInfo().getCompanies(), currentUpdate.getServerInfo().getCompanies() );
 
             // Add the events to the queue
             if ( railEvent != null )
@@ -411,15 +376,15 @@ public class ServerHandler
         // from the SERVER_DETAILED_INFO-packet so the methods for
         // getting clients/spectators now throws exception if UDP-version
         // is higher than 4.
-        if ( lastUpdate.getServerDetailedInfo().getVersion() >= 5 )
+        if ( lastUpdate.getServerInfo().getVersion() >= 5 )
         {
             try
             {
                 if ( lastUpdate != null )
                 {
                     // Did any clients join/leave?
-                    List<Client> oldClients = lastUpdate.getServerDetailedInfo().getAllClients();
-                    List<Client> newClients = currentUpdate.getServerDetailedInfo().getAllClients();
+                    List<Client> oldClients = lastUpdate.getServerInfo().getAllClients();
+                    List<Client> newClients = currentUpdate.getServerInfo().getAllClients();
                     List<OpenTTDEvent> joinEvents = checkForClientsJoined( oldClients, newClients );
                     List<OpenTTDEvent> leftEvents = checkForClientsLeft( oldClients, newClients );
 
@@ -428,7 +393,7 @@ public class ServerHandler
                 }
                 else
                 {
-                    List<Client> newClients = currentUpdate.getServerDetailedInfo().getAllClients();
+                    List<Client> newClients = currentUpdate.getServerInfo().getAllClients();
                     if ( newClients.size() > 0 )
                     {
                         evts.add( new OpenTTDEvent( OpenTTDEventType.CLIENT_JOIN, (Object[]) newClients.toArray( new Client[ newClients.size() ] ) ) );
@@ -482,9 +447,9 @@ public class ServerHandler
         return diff;
     }
 
-    private int compareDates( JOTLQuerier lastUpdate, JOTLQuerier currentUpdate )
+    private int compareDates( Game lastUpdate, Game currentUpdate )
     {
-        return compareDates( lastUpdate.getServerResponseInfo().getGameDate(), currentUpdate.getServerResponseInfo().getGameDate() );
+        return compareDates( lastUpdate.getClientsInfo().getGameDate(), currentUpdate.getClientsInfo().getGameDate() );
     }
 
     /**
@@ -589,7 +554,7 @@ public class ServerHandler
                         LOG.debug( "Yes it has!" );
                         paused = false;
                         unpauseCounter = 0;
-                        evt = new OpenTTDEvent( OpenTTDEventType.UNPAUSED, Integer.valueOf( currentUpdate.getServerResponseInfo().getGameDate()[2] ) );
+                        evt = new OpenTTDEvent( OpenTTDEventType.UNPAUSED, Integer.valueOf( currentUpdate.getClientsInfo().getGameDate()[2] ) );
                     }
                 }
                 LOG.debug( "No it hasn't." );
@@ -605,7 +570,7 @@ public class ServerHandler
                         LOG.debug( "Yes it has!" );
                         paused = true;
                         pauseCounter = 1;
-                        evt = new OpenTTDEvent( OpenTTDEventType.PAUSED, Integer.valueOf( currentUpdate.getServerResponseInfo().getGameDate()[2] ) );
+                        evt = new OpenTTDEvent( OpenTTDEventType.PAUSED, Integer.valueOf( currentUpdate.getClientsInfo().getGameDate()[2] ) );
                     }
                 }
                 else
@@ -633,7 +598,7 @@ public class ServerHandler
      * @param curUpdate the new update
      * @return whether they are equal
      */
-    private boolean representsSameGame( JOTLQuerier lastUpdate, JOTLQuerier curUpdate )
+    private boolean representsSameGame( Game lastUpdate, Game curUpdate )
     {
         // Is the first game?
         if ( lastUpdate == null )
@@ -642,10 +607,10 @@ public class ServerHandler
             return false;
         }
 
-        ClientsInfo sriOld = lastUpdate.getServerResponseInfo();
-        ClientsInfo sriNew = curUpdate.getServerResponseInfo();
-        ServerInfo sdiOld = lastUpdate.getServerDetailedInfo();
-        ServerInfo sdiNew = curUpdate.getServerDetailedInfo();
+        ClientsInfo sriOld = lastUpdate.getClientsInfo();
+        ClientsInfo sriNew = curUpdate.getClientsInfo();
+        ServerInfo sdiOld = lastUpdate.getServerInfo();
+        ServerInfo sdiNew = curUpdate.getServerInfo();
 
         // Check terrain type
         if ( sriOld.getTileset() != sriNew.getTileset() )
@@ -737,7 +702,7 @@ public class ServerHandler
             earlierGames = new ArrayList<Game>();
         }
         // Remember it and insert it into the bottom of the list. :)
-        earlierGames.add( 0, lastUpdate.toGame() );
+        earlierGames.add( 0, lastUpdate );
     }
 
     /**
@@ -747,10 +712,6 @@ public class ServerHandler
     {
         // currentUpdate is now made lastUpdate
         lastUpdate = currentUpdate;
-        // Make currentUpdate unable to do any updates.
-        // This shouldn't be necessary since it's only kept for
-        // statistical purposes.
-        currentUpdate.makeUnupdatable();
         // Make sure that when the next update occurs
         // lastUpdate isn't used.
         currentUpdate = null;
@@ -772,7 +733,7 @@ public class ServerHandler
         // So if lastUpdate IS NOT null that means a game ended.
         if ( !sameGame && lastUpdate != null )
         {
-            evt = new OpenTTDEvent( OpenTTDEventType.GAME_END, Integer.valueOf( lastUpdate.getServerResponseInfo().getGameDate()[2] ) );
+            evt = new OpenTTDEvent( OpenTTDEventType.GAME_END, Integer.valueOf( lastUpdate.getClientsInfo().getGameDate()[2] ) );
         }
         return evt;
     }
@@ -786,14 +747,14 @@ public class ServerHandler
      * @return an {@link OpenTTDEvent} of type GAME_START or null
      * @see OpenTTDEventType
      */
-    private OpenTTDEvent checkForNewGame( boolean samegame, JOTLQuerier currentUpdate )
+    private OpenTTDEvent checkForNewGame( boolean samegame, Game currentUpdate )
     {
         // Check to find out whether a new game has started.
         OpenTTDEvent evt = null;
         if ( !samegame )
         {
             // This means a new game has started! :)
-            evt = new OpenTTDEvent( OpenTTDEventType.GAME_START, Integer.valueOf( currentUpdate.getServerResponseInfo().getStartDate()[2] ) );
+            evt = new OpenTTDEvent( OpenTTDEventType.GAME_START, Integer.valueOf( currentUpdate.getClientsInfo().getStartDate()[2] ) );
             // Let's reset some useful variables
             electricRail = false;
             monoRail = false;

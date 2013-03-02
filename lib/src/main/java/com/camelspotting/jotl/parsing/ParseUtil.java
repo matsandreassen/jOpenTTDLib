@@ -17,6 +17,7 @@
 package com.camelspotting.jotl.parsing;
 
 import com.camelspotting.jotl.domain.Server;
+import com.camelspotting.jotl.exceptions.IllegalHostException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.text.DateFormatSymbols;
@@ -342,17 +343,32 @@ public final class ParseUtil
      * @return an {@link InetAddress}-object
      * @throws java.net.UnknownHostException
      */
-    public static Server parseHost( String host, int port ) throws UnknownHostException
+    public static Server parseHost( String host, int port ) throws IllegalHostException
     {
-        if ( Pattern.matches( ipv4Pattern, host ) )
+        try
         {
-            return new Server( host, port, parseIPv4( host ) );
+            InetAddress address;
+            String ip;
+            String hostname = null;
+            if ( Pattern.matches( ipv4Pattern, host ) )
+            {
+                ip = host;
+
+                address = parseIPv4( host );
+            }
+            else
+            {   // Try to resolve through DNS
+                address = InetAddress.getByName( host );
+                ip = address.getHostAddress();
+                LOG.debug( "{} was resolved to {}", host, ip );
+                return new Server( host, address.getHostAddress(), port, address );
+            }
+            return new Server( hostname, ip, port, address );
         }
-        else
-        {   // Try to resolve through DNS
-            InetAddress address = InetAddress.getByName( host );
-            LOG.debug( "{} was resolved to {}", host, address.getHostAddress() );
-            return new Server( host, address.getHostAddress(), port, address );
+        catch ( UnknownHostException ex )
+        {
+            Server s = new Server( host, port, null );
+            throw new IllegalHostException( s, ex );
         }
     }
 

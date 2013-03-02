@@ -14,7 +14,11 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package com.camelspotting.jotl;
+package com.camelspotting.jotl.domain;
+
+import com.camelspotting.jotl.ClientsInfo;
+import com.camelspotting.jotl.ServerHandler;
+import com.camelspotting.jotl.ServerInfo;
 
 /**
  * This method is is just a wrapper for response and detail information, and is
@@ -51,7 +55,7 @@ public class Game
      * @param clientsInfo the information to contain
      * @param serverInfo more information to contain
      */
-    Game( ClientsInfo sri, ServerInfo sdi )
+    public Game( ClientsInfo sri, ServerInfo sdi )
     {
         this.id = ++Game.id_inc;
         this.clientsInfo = sri;
@@ -63,9 +67,9 @@ public class Game
      *
      * @return the {@link ClientsInfo} object
      */
-    public ClientsInfo getServeInfo()
+    public ServerInfo getServerInfo()
     {
-        return clientsInfo;
+        return serverInfo;
     }
 
     /**
@@ -73,8 +77,17 @@ public class Game
      *
      * @return the {@link ServerInfo} object
      */
-    public ServerInfo getClientsInfo()
+    public ClientsInfo getClientsInfo()
     {
-        return serverInfo;
+        return clientsInfo;
+    }
+
+    @Override
+    public String toString()
+    {
+        StringBuilder sb = new StringBuilder( "Game: \n" );
+        sb.append( serverInfo.toString() );
+        sb.append( clientsInfo.toString() );
+        return sb.toString();
     }
 }
