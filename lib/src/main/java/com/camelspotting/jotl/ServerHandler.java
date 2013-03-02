@@ -378,30 +378,24 @@ public class ServerHandler
         // is higher than 4.
         if ( lastUpdate.getServerInfo().getVersion() >= 5 )
         {
-            try
+            if ( lastUpdate != null )
             {
-                if ( lastUpdate != null )
-                {
-                    // Did any clients join/leave?
-                    List<Client> oldClients = lastUpdate.getServerInfo().getClients();
-                    List<Client> newClients = currentUpdate.getServerInfo().getClients();
-                    List<OpenTTDEvent> joinEvents = checkForClientsJoined( oldClients, newClients );
-                    List<OpenTTDEvent> leftEvents = checkForClientsLeft( oldClients, newClients );
+                // Did any clients join/leave?
+                List<Client> oldClients = lastUpdate.getServerInfo().getClients();
+                List<Client> newClients = currentUpdate.getServerInfo().getClients();
+                List<OpenTTDEvent> joinEvents = checkForClientsJoined( oldClients, newClients );
+                List<OpenTTDEvent> leftEvents = checkForClientsLeft( oldClients, newClients );
 
-                    evts.addAll( joinEvents );
-                    evts.addAll( leftEvents );
-                }
-                else
-                {
-                    List<Client> newClients = currentUpdate.getServerInfo().getClients();
-                    if ( newClients.size() > 0 )
-                    {
-                        evts.add( new OpenTTDEvent( OpenTTDEventType.CLIENT_JOIN, (Object[]) newClients.toArray( new Client[ newClients.size() ] ) ) );
-                    }
-                }
+                evts.addAll( joinEvents );
+                evts.addAll( leftEvents );
             }
-            catch ( JOTLException otx )
+            else
             {
+                List<Client> newClients = currentUpdate.getServerInfo().getClients();
+                if ( newClients.size() > 0 )
+                {
+                    evts.add( new OpenTTDEvent( OpenTTDEventType.CLIENT_JOIN, (Object[]) newClients.toArray( new Client[ newClients.size() ] ) ) );
+                }
             }
         }
 

@@ -6,6 +6,8 @@ import com.camelspotting.jotl.GameQuerier;
 import com.camelspotting.jotl.exceptions.JOTLException;
 import com.camelspotting.jotl.udp.UDPGameQuerier;
 import com.camelspotting.jotl.domain.Game;
+import com.camelspotting.jotl.exceptions.IllegalHostException;
+import com.camelspotting.jotl.exceptions.UnreachableHostException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,8 +41,16 @@ public class Main
         }
         catch ( ParameterException ex )
         {
-            println( String.format( "Parse error: %s", ex.getMessage() ) );
+            println( "Parse error: %s", ex.getMessage() );
             com.usage();
+        }
+        catch ( UnreachableHostException ex )
+        {
+            println( "Could not reach %s. Cause: %s", ex.getServer(), ex.getMessage() );
+        }
+        catch ( IllegalHostException ex )
+        {
+            println( "Could not reach %s. Cause: %s", ex.getServer(), ex.getMessage() );
         }
         catch ( JOTLException ex )
         {
@@ -49,8 +59,8 @@ public class Main
         }
     }
 
-    private static void println( String msg )
+    private static void println( String format, Object... params )
     {
-        System.out.println( msg );
+        System.out.println( String.format( format, params ) );
     }
 }

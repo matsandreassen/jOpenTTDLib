@@ -24,10 +24,12 @@ import com.camelspotting.jotl.exceptions.JOTLException;
 import com.camelspotting.jotl.parsing.ParseUtil;
 import com.camelspotting.jotl.domain.Server;
 import com.camelspotting.jotl.exceptions.IllegalHostException;
+import com.camelspotting.jotl.exceptions.UnreachableHostException;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
+import java.net.SocketTimeoutException;
 import java.util.Arrays;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -99,6 +101,10 @@ public final class UDPGameQuerier implements GameQuerier
 
             return UDPPacketParser.parseClients( reply );
         }
+        catch ( SocketTimeoutException ex )
+        {
+            throw new UnreachableHostException( server, ex );
+        }
         catch ( IOException ex )
         {
             throw new JOTLException( ex );
@@ -126,6 +132,10 @@ public final class UDPGameQuerier implements GameQuerier
             }
 
             return UDPPacketParser.parseServerInfo( reply );
+        }
+        catch ( SocketTimeoutException ex )
+        {
+            throw new UnreachableHostException( server, ex );
         }
         catch ( IOException ex )
         {
