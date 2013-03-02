@@ -117,7 +117,7 @@ public final class ClientsInfo
      *
      * @param data the buffer
      */
-    ClientsInfo( byte[] data )
+    public ClientsInfo( byte[] data )
     {
         int i = 3;
         int version = data[i++];

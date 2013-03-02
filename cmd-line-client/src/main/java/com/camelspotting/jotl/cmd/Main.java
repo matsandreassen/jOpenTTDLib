@@ -4,7 +4,7 @@ import com.beust.jcommander.JCommander;
 import com.beust.jcommander.ParameterException;
 import com.camelspotting.jotl.GameQuerier;
 import com.camelspotting.jotl.exceptions.JOTLException;
-import com.camelspotting.jotl.UDPGameQuerier;
+import com.camelspotting.jotl.udp.UDPGameQuerier;
 import com.camelspotting.jotl.domain.Game;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

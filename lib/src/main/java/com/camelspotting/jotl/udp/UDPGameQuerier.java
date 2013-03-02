@@ -14,8 +14,11 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package com.camelspotting.jotl;
+package com.camelspotting.jotl.udp;
 
+import com.camelspotting.jotl.ClientsInfo;
+import com.camelspotting.jotl.GameQuerier;
+import com.camelspotting.jotl.ServerInfo;
 import com.camelspotting.jotl.domain.Game;
 import com.camelspotting.jotl.exceptions.JOTLException;
 import com.camelspotting.jotl.parsing.ParseUtil;
@@ -62,22 +65,6 @@ public final class UDPGameQuerier implements GameQuerier
      * The local port
      */
     private int fromPort;
-
-    /**
-     * This is a convience constructor only accessible inside the package to
-     * facilitate easier use from ServerHandler.
-     *
-     * @param host the hostname (openttd.someserver.com) or IPv4 to contact (ex:
-     * 127.0.0.1)
-     * @param fromPort the port to use
-     * @param queryInfo whether to query server immidiately
-     * @see ServerHandler
-     */
-    UDPGameQuerier( Server server, int fromPort ) throws JOTLException
-    {
-        this.server = server;
-        this.fromPort = fromPort;
-    }
 
     /**
      * Main constructor for class.
