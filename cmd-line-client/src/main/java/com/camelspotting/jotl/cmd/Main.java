@@ -13,12 +13,13 @@ import org.slf4j.LoggerFactory;
  */
 public class Main
 {
+
     private static final Logger LOG = LoggerFactory.getLogger( Main.class );
 
     private Main()
     {
     }
-    
+
     public static void main( String... args )
     {
         Params params = new Params();
@@ -30,7 +31,7 @@ public class Main
             int port = params.port;
             int localPort = params.localPort;
 
-            JOTLQuerier q = new JOTLQuerier( host, port, localPort, true );
+            JOTLQuerier q = new JOTLQuerier( host, localPort, port, true );
             println( q.toString() );
         }
         catch ( ParameterException ex )
