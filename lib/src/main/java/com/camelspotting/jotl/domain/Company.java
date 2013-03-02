@@ -14,9 +14,9 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package com.camelspotting.jotl;
+package com.camelspotting.jotl.domain;
 
-import com.camelspotting.jotl.domain.Client;
+import com.camelspotting.jotl.ServerInfo;
 import com.camelspotting.jotl.parsing.Station;
 import com.camelspotting.jotl.parsing.Vehicle;
 import java.util.ArrayList;
@@ -31,53 +31,53 @@ import java.util.Map;
  * @author Mats Andreassen
  * @version 1.0
  */
-public final class Company implements Comparable<Company>
+public class Company implements Comparable<Company>
 {
 
     /**
      * In-game id
      */
-    private int currentId;
+    private final int currentId;
     /**
      * The company name
      */
-    private String companyName;
+    private final String companyName;
     /**
      * The year the company was founded
      */
-    private int inaugerated;
+    private final int inaugerated;
     /**
      * A company's worth
      */
-    private long companyValue;
+    private final long companyValue;
     /**
      * The current balance
      */
-    private long balance;
+    private final long balance;
     /**
      * The company's income
      */
-    private long income;
+    private final long income;
     /**
      * Whether or not the company has been password protected
      */
-    private boolean pwProtected;
+    private final boolean pwProtected;
     /**
      * The rating of a company
      */
-    private int rating;
+    private final int rating;
     /**
      * The vehicle count
      */
-    private Map<Vehicle, Integer> vehicleCountMap;
+    private final Map<Vehicle, Integer> vehicleCountMap;
     /**
      * The station count
      */
-    private Map<Station, Integer> stationCountMap;
+    private final Map<Station, Integer> stationCountMap;
     /**
      * Clients connected to this company
      */
-    private ArrayList<Client> clients;
+    private final ArrayList<Client> clients;
 
     /**
      * The constructor for companies.
@@ -91,8 +91,9 @@ public final class Company implements Comparable<Company>
      * @param rating company's rating
      * @param pwProtected whether or not the company has been password protected
      */
-    Company( int currentId, String companyName, int inaugerated, long companyValue, long balance, long income, int performance, boolean pwProtected )
+    public Company( int currentId, String companyName, int inaugerated, long companyValue, long balance, long income, int performance, boolean pwProtected )
     {
+        this.clients = new ArrayList<Client>();
         this.currentId = currentId;
         this.companyName = companyName;
         this.inaugerated = inaugerated;
@@ -110,12 +111,8 @@ public final class Company implements Comparable<Company>
      *
      * @param c the {@link Client} to add
      */
-    void addClient( Client c )
+    public void addClient( Client c )
     {
-        if ( clients == null )
-        {
-            clients = new ArrayList<Client>();
-        }
         clients.add( c );
     }
 
@@ -126,10 +123,6 @@ public final class Company implements Comparable<Company>
      */
     public List<Client> getClients()
     {
-        if ( clients == null )
-        {
-            clients = new ArrayList<Client>();
-        }
         return Collections.unmodifiableList( clients );
     }
 
@@ -139,7 +132,7 @@ public final class Company implements Comparable<Company>
      * @param vehicle the vehicle to update
      * @param value the value to set
      */
-    void setNumberOfVehicles( Vehicle vehicle, int value )
+    public void setNumberOfVehicles( Vehicle vehicle, int value )
     {
         vehicleCountMap.put( vehicle, value );
     }
@@ -151,7 +144,7 @@ public final class Company implements Comparable<Company>
      * @param value the value to set
      * @see ServerInfo#stations
      */
-    void setNumberOfStations( Station station, int value )
+    public void setNumberOfStations( Station station, int value )
     {
         stationCountMap.put( station, value );
     }

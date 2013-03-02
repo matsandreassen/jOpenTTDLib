@@ -16,6 +16,7 @@
  */
 package com.camelspotting.jotl;
 
+import com.camelspotting.jotl.domain.Company;
 import com.camelspotting.jotl.domain.Game;
 import com.camelspotting.jotl.exceptions.JOTLException;
 import com.camelspotting.jotl.domain.Client;

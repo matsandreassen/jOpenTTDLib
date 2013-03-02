@@ -16,7 +16,6 @@
  */
 package com.camelspotting.jotl.domain;
 
-import com.camelspotting.jotl.Company;
 import com.camelspotting.jotl.parsing.ParseUtil;
 import java.util.Arrays;
 import java.util.Locale;
@@ -27,29 +26,29 @@ import java.util.Locale;
  * @author Mats Andreassen
  * @version 1.0
  */
-public final class Client implements Comparable<Client>
+public class Client implements Comparable<Client>
 {
 
     /**
      * The name of the client
      */
-    private String name;
+    private final String name;
     /**
      * A non-spectating client must be connected to a company
      */
-    private Company comp;
+    private final Company comp;
     /**
      * A unique ID identifying the client
      */
-    private String uniqueId;
+    private final String uniqueId;
     /**
      * What date this client joined the game
      */
-    private int[] joinDate;
+    private final int[] joinDate;
     /**
      * Whether or not the client is a spectator
      */
-    private boolean spectator;
+    private final boolean spectator;
 
     /**
      * Constructor for clients.

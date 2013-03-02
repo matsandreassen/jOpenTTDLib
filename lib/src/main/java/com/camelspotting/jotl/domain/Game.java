@@ -39,15 +39,15 @@ public class Game
     /**
      * One of the objects that will contain gathered information
      */
-    private ClientsInfo clientsInfo;
+    private final ClientsInfo clientsInfo;
     /**
      * One of the objects that will contain gathered information
      */
-    private ServerInfo serverInfo;
+    private final ServerInfo serverInfo;
     /**
      * Game ID
      */
-    private int id;
+    private final int id;
 
     /**
      * This internal constructor is for creating these archive objects.

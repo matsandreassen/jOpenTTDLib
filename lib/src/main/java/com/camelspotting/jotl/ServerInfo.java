@@ -16,13 +16,13 @@
  */
 package com.camelspotting.jotl;
 
+import com.camelspotting.jotl.domain.Company;
 import com.camelspotting.jotl.exceptions.JOTLException;
 import com.camelspotting.jotl.domain.Client;
 import com.camelspotting.jotl.parsing.ParseUtil;
 import com.camelspotting.jotl.parsing.Station;
 import com.camelspotting.jotl.parsing.Vehicle;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import org.slf4j.Logger;
