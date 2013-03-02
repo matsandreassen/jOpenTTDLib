@@ -24,7 +24,6 @@ import com.camelspotting.jotl.event.OpenTTDEvent;
 import com.camelspotting.jotl.event.OpenTTDEventType;
 import com.camelspotting.jotl.event.OpenTTDListener;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -296,12 +295,12 @@ public class ServerHandler
         OpenTTDEvent newgame = checkForNewGame( isSameGame, currentUpdate );
         if ( newgame != null )
         {
-            int diff = compareDates( currentUpdate.getClientsInfo().getGameDate(), currentUpdate.getClientsInfo().getStartDate() );
+            int diff = currentUpdate.getClientsInfo().getGameDate().compareTo( currentUpdate.getClientsInfo().getStartDate() );
             if ( diff < 0 )
             {
                 // This is not a "new" game, but a game in progress
                 LOG.debug( "I found out a 'new game' was acually a game in progress." );
-                newgame = new OpenTTDEvent( OpenTTDEventType.GAME_IN_PROGRESS, Integer.valueOf( currentUpdate.getClientsInfo().getGameDate()[2] ) );
+                newgame = new OpenTTDEvent( OpenTTDEventType.GAME_IN_PROGRESS, Integer.valueOf( currentUpdate.getClientsInfo().getGameDate().getYear() ) );
             }
         }
         OpenTTDEvent endgame = checkForEndGame( isSameGame );
@@ -338,7 +337,7 @@ public class ServerHandler
             // A new game didn't start but we still have to see what
             // happens.
             // Has any type of new rail been made available?
-            OpenTTDEvent railEvent = checkForNewRail( currentUpdate.getClientsInfo().getGameDate()[2] );
+            OpenTTDEvent railEvent = checkForNewRail( currentUpdate.getClientsInfo().getGameDate().getYear() );
 
             // Do we have a new leader?
             OpenTTDEvent newLeader = checkForNewLeader( lastList, curList );
@@ -417,40 +416,9 @@ public class ServerHandler
         doFinalBookkeeping();
     }
 
-    private int compareDates( int[] first, int second[] )
-    {
-        // Year example: 2000 - 1973
-        int diff = second[2] - first[2]; // Year
-        if ( diff == 0 )
-        {
-            // Month example: 11 - 9
-            diff = second[1] - first[1]; // Month
-            if ( diff == 0 )
-            {
-                // Day example: 26 - 13
-                diff = second[0] - first[0]; // Day
-            }
-        }
-        String sign;
-        if ( diff > 0 )
-        {
-            sign = ">";
-        }
-        else if ( diff == 0 )
-        {
-            sign = "=";
-        }
-        else
-        {
-            sign = "<";
-        }
-        LOG.debug( "Comparing dates: {} {} {}", Arrays.toString( second ), sign, Arrays.toString( first ) );
-        return diff;
-    }
-
     private int compareDates( Game lastUpdate, Game currentUpdate )
     {
-        return compareDates( lastUpdate.getClientsInfo().getGameDate(), currentUpdate.getClientsInfo().getGameDate() );
+        return lastUpdate.getClientsInfo().getGameDate().compareTo( currentUpdate.getClientsInfo().getGameDate() );
     }
 
     /**
@@ -555,7 +523,7 @@ public class ServerHandler
                         LOG.debug( "Yes it has!" );
                         paused = false;
                         unpauseCounter = 0;
-                        evt = new OpenTTDEvent( OpenTTDEventType.UNPAUSED, Integer.valueOf( currentUpdate.getClientsInfo().getGameDate()[2] ) );
+                        evt = new OpenTTDEvent( OpenTTDEventType.UNPAUSED, Integer.valueOf( currentUpdate.getClientsInfo().getGameDate().getYear() ) );
                     }
                 }
                 LOG.debug( "No it hasn't." );
@@ -571,7 +539,7 @@ public class ServerHandler
                         LOG.debug( "Yes it has!" );
                         paused = true;
                         pauseCounter = 1;
-                        evt = new OpenTTDEvent( OpenTTDEventType.PAUSED, Integer.valueOf( currentUpdate.getClientsInfo().getGameDate()[2] ) );
+                        evt = new OpenTTDEvent( OpenTTDEventType.PAUSED, Integer.valueOf( currentUpdate.getClientsInfo().getGameDate().getYear() ) );
                     }
                 }
                 else
@@ -648,20 +616,13 @@ public class ServerHandler
             return false;
         }
         // Check startdate
-        int[] d1 = sriOld.getStartDate();
-        int[] d2 = sriNew.getStartDate();
-        for ( int i = 0; i < 3; i++ )
+        if ( !sriOld.getStartDate().equals( sriNew.getStartDate() ) )
         {
-            if ( d1[i] != d2[i] )
-            {
-                LOG.debug( "Comparing games: different start dates found." );
-                return false;
-            }
+            LOG.debug( "Comparing games: different start dates found." );
+            return false;
         }
         // The current date must be is at least equal
-        d1 = sriOld.getGameDate();
-        d2 = sriNew.getGameDate();
-        if ( compareDates( d1, d2 ) < 0 )
+        if ( sriOld.getGameDate().compareTo( sriNew.getGameDate() ) < 0 )
         {
             LOG.debug( "Comparing games: new game has lower game date than the old game." );
             return false;
@@ -734,7 +695,7 @@ public class ServerHandler
         // So if lastUpdate IS NOT null that means a game ended.
         if ( !sameGame && lastUpdate != null )
         {
-            evt = new OpenTTDEvent( OpenTTDEventType.GAME_END, Integer.valueOf( lastUpdate.getClientsInfo().getGameDate()[2] ) );
+            evt = new OpenTTDEvent( OpenTTDEventType.GAME_END, Integer.valueOf( lastUpdate.getClientsInfo().getGameDate().getYear() ) );
         }
         return evt;
     }
@@ -755,7 +716,7 @@ public class ServerHandler
         if ( !samegame )
         {
             // This means a new game has started! :)
-            evt = new OpenTTDEvent( OpenTTDEventType.GAME_START, Integer.valueOf( currentUpdate.getClientsInfo().getStartDate()[2] ) );
+            evt = new OpenTTDEvent( OpenTTDEventType.GAME_START, Integer.valueOf( currentUpdate.getClientsInfo().getStartDate().getYear() ) );
             // Let's reset some useful variables
             electricRail = false;
             monoRail = false;

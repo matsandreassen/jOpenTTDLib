@@ -16,8 +16,7 @@
  */
 package com.camelspotting.jotl;
 
-import com.camelspotting.jotl.util.DateUtil;
-import java.util.Locale;
+import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,11 +47,11 @@ public final class ClientsInfo
     /**
      * Holds the current game date
      */
-    private int[] gameDate;
+    private LocalDate gameDate;
     /**
      * Holds the game's start date
      */
-    private int[] startDate;
+    private LocalDate startDate;
     /**
      * The maximum allowed companies
      */
@@ -110,7 +109,7 @@ public final class ClientsInfo
      */
     private String mapName;
 
-    public ClientsInfo( GRFRequest[] grfRequests, String serverName, int[] gameDate, int[] startDate, int maxCompanies, int onCompanies, int maxSpectators, int onSpectators, int maxClients, int onClients, int[] revision, int serverLang, boolean passwordProtected, boolean dedicated, int tileset, int mapHeight, int mapWidth, String mapName )
+    public ClientsInfo( GRFRequest[] grfRequests, String serverName, LocalDate gameDate, LocalDate startDate, int maxCompanies, int onCompanies, int maxSpectators, int onSpectators, int maxClients, int onClients, int[] revision, int serverLang, boolean passwordProtected, boolean dedicated, int tileset, int mapHeight, int mapWidth, String mapName )
     {
         this.grfRequests = grfRequests;
         this.serverName = serverName;
@@ -181,9 +180,9 @@ public final class ClientsInfo
      * Method for getting the start date so that other formatting may be
      * applied.
      *
-     * @return [0] = day(1-31), [1] = month(0-11), [2] = year
+     * @return date
      */
-    public int[] getStartDate()
+    public LocalDate getStartDate()
     {
         return startDate;
     }
@@ -196,27 +195,16 @@ public final class ClientsInfo
      */
     public String getLongStartDate()
     {
-        return DateUtil.getLongDate( startDate, Locale.UK );
-    }
-
-    /**
-     * Convenience method for getting the start date in a formatted manner with
-     * short month name.
-     *
-     * @return the formatted date
-     */
-    public String getShortStartDate()
-    {
-        return DateUtil.getShortDate( startDate, Locale.UK );
+        return startDate.toString( "YYYY-MM-dd" );
     }
 
     /**
      * Method for getting the current game date so that other formatting may be
      * applied.
      *
-     * @return [0] = day(1-31), [1] = month(0-11), [2] = year
+     * @return date
      */
-    public int[] getGameDate()
+    public LocalDate getGameDate()
     {
         return gameDate;
     }
@@ -229,18 +217,7 @@ public final class ClientsInfo
      */
     public String getLongGameDate()
     {
-        return DateUtil.getLongDate( gameDate, Locale.UK );
-    }
-
-    /**
-     * Convenience method for getting the game date in a formatted manner with
-     * short month name.
-     *
-     * @return the formatted date
-     */
-    public String getShortGameDate()
-    {
-        return DateUtil.getShortDate( gameDate, Locale.UK );
+        return gameDate.toString( "YYYY-MM-dd" );
     }
 
     /**

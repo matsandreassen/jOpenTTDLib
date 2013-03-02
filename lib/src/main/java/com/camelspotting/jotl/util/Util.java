@@ -7,10 +7,10 @@ import java.util.Locale;
  *
  * @author Mats Andreassen
  */
-public class DateUtil
+public class Util
 {
 
-    private DateUtil()
+    private Util()
     {
     }
 

@@ -2,9 +2,9 @@ package com.camelspotting.jotl.udp;
 
 import com.camelspotting.jotl.ClientsInfo;
 import com.camelspotting.jotl.GRFRequest;
-import com.camelspotting.jotl.ServerInfo;
 import com.camelspotting.jotl.parsing.ParseUtil;
 import java.util.Arrays;
+import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,6 +21,17 @@ public class UDPPacketParser
     {
     }
 
+    /**
+     * Based on OpenTTD source code:
+     * <ul>
+     * <li>Source file: src/network/core/udp.cpp</li>
+     * <li>Packet sending code: SendNetworkGameInfo</li>
+     * <li>Packet parsing code: ReceiveNetworkGameInfo</li>
+     * </ul>
+     *
+     * @param data
+     * @return
+     */
 //    public static ServerInfo parseServerInfo( byte[] data )
 //    {
 //    }
@@ -62,17 +73,17 @@ public class UDPPacketParser
             }
         }
 
-        int[] gameDate = null, startDate = null;
+        LocalDate gameDate = null, startDate = null;
         if ( version >= 3 )
         {
             LOG.info( "Processing version 3 data." );
             int numberOfDays = BitUtil.parse32BitNumber( data, i );
-            gameDate = ParseUtil.parseDate( numberOfDays );
-            LOG.debug( "Game date: {}", Arrays.toString( gameDate ) );
+            gameDate = DateUtil.convertDateToYMD( numberOfDays );
+            LOG.debug( "Game date: {}", gameDate );
             i += 4;
             numberOfDays = BitUtil.parse32BitNumber( data, i );
-            startDate = ParseUtil.parseDate( numberOfDays );
-            LOG.debug( "Start date: {}", Arrays.toString( startDate ) );
+            startDate = DateUtil.convertDateToYMD( numberOfDays );
+            LOG.debug( "Start date: {}", startDate );
             i += 4;
         }
 

@@ -23,9 +23,11 @@ import com.camelspotting.jotl.parsing.ParseUtil;
 import com.camelspotting.jotl.parsing.Station;
 import com.camelspotting.jotl.parsing.Vehicle;
 import com.camelspotting.jotl.udp.BitUtil;
+import com.camelspotting.jotl.udp.DateUtil;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -187,7 +189,7 @@ public final class ServerInfo
                 String uniqueId = ParseUtil.parseString( data, i, length );
                 i += length + 1;
                 // join_date is transmitted in 
-                int[] joinDate = ParseUtil.parseDate( BitUtil.parse32BitNumber( data, i ) );
+                LocalDate joinDate = DateUtil.convertDateToYMD(BitUtil.parse32BitNumber( data, i ) );
                 i += 4;
 
                 Client client = new Client( cName, uniqueId, joinDate, false, com );
@@ -212,7 +214,7 @@ public final class ServerInfo
             length = ParseUtil.locateNextZero( data, i );
             String uniqueId = ParseUtil.parseString( data, i, length );
             i += length + 1;
-            int[] joinDate = ParseUtil.parseDate( BitUtil.parse32BitNumber( data, i ) );
+            LocalDate joinDate = DateUtil.convertDateToYMD( BitUtil.parse32BitNumber( data, i ) );
             i += 4;
 
             Client client = new Client( cName, uniqueId, joinDate, true, null );

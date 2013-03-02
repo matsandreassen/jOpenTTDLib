@@ -16,10 +16,7 @@
  */
 package com.camelspotting.jotl.domain;
 
-import com.camelspotting.jotl.parsing.ParseUtil;
-import com.camelspotting.jotl.util.DateUtil;
-import java.util.Arrays;
-import java.util.Locale;
+import org.joda.time.LocalDate;
 
 /**
  * This class represents a connected client, both player and spectator.
@@ -45,7 +42,7 @@ public class Client implements Comparable<Client>
     /**
      * What date this client joined the game
      */
-    private final int[] joinDate;
+    private final LocalDate joinDate;
     /**
      * Whether or not the client is a spectator
      */
@@ -60,7 +57,7 @@ public class Client implements Comparable<Client>
      * @param spectator whether or not the client is a spectator
      * @param com the company the client is connected to
      */
-    public Client( String name, String uniqueId, int[] joinDate, boolean spectator, Company com )
+    public Client( String name, String uniqueId, LocalDate joinDate, boolean spectator, Company com )
     {
         this.name = name;
         this.uniqueId = uniqueId;
@@ -111,17 +108,7 @@ public class Client implements Comparable<Client>
      */
     public String getLongJoinDate()
     {
-        return DateUtil.getLongDate( joinDate, Locale.UK );
-    }
-
-    /**
-     * Getter for a clients join date in short format.
-     *
-     * @return the join date
-     */
-    public String getShortJoinDate()
-    {
-        return DateUtil.getShortDate( joinDate, Locale.UK );
+        return joinDate.toString( "YYYY-MM-dd" );
     }
 
     /**
@@ -185,7 +172,7 @@ public class Client implements Comparable<Client>
     {
         int hash = 7;
         hash = 37 * hash + ( this.uniqueId != null ? this.uniqueId.hashCode() : 0 );
-        hash = 37 * hash + Arrays.hashCode( this.joinDate );
+        hash = 37 * hash + this.joinDate.hashCode();
         return hash;
     }
 }
