@@ -45,7 +45,7 @@ public class GRFRequest
      * @param md5Check the graphic's MD5 checksum
      * @param name the graphic's name
      */
-    GRFRequest( String id, String md5Check, String name )
+    public GRFRequest( String id, String md5Check, String name )
     {
         this.id = id;
         this.md5Check = md5Check;
@@ -58,7 +58,7 @@ public class GRFRequest
      * @param id the graphic's ID
      * @param md5Check the graphic's MD5 checksum
      */
-    GRFRequest( String id, String md5Check )
+    public GRFRequest( String id, String md5Check )
     {
         this( id, md5Check, "n/a" );
     }

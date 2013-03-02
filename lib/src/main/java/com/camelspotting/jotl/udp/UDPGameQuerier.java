@@ -97,7 +97,7 @@ public final class UDPGameQuerier implements GameQuerier
                 throw new JOTLException( String.format( "Expected packet type: %s. Received: %s.", PacketType.CLIENT_DETAIL_INFO, type ) );
             }
 
-            return new ClientsInfo( reply );
+            return UDPPacketParser.parseClients( reply );
         }
         catch ( IOException ex )
         {

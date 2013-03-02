@@ -20,9 +20,7 @@ import com.camelspotting.jotl.domain.Server;
 import com.camelspotting.jotl.exceptions.IllegalHostException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.text.DateFormatSymbols;
 import java.util.Arrays;
-import java.util.Locale;
 import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -74,160 +72,6 @@ public final class ParseUtil
             B[i] = Integer.valueOf( A[i] );
         }
         return B;
-    }
-
-    /**
-     * Method to overcome Java's lack of unsigned bytes. It's bit-magic. Haha!
-     *
-     * @param v the byte to 'translate' to long
-     * @return an 'unsigned' byte as a long
-     */
-    private static long toUnsignedLong( byte v )
-    {
-        long i = (long) v;
-        return ~( i ^ 0xff ) & i;
-    }
-
-    /**
-     * Method to overcome Java's lack of unsigned bytes. It's bit-magic. Haha!
-     *
-     * @param v the byte to 'translate' to int
-     * @return an 'unsigned' byte as an int
-     */
-    private static int toUnsignedInt( byte v )
-    {
-        int i = (int) v;
-        return ~( i ^ 0xff ) & i;
-    }
-
-    /**
-     * Support method for converting 8 bytes to unsigned longs by 'bit magic'.
-     *
-     * @param B the byte array
-     * @param offset the index of where to start
-     * @return an array of longs
-     */
-    private static long[] getUnsigned64BitValues( byte[] B, int offset )
-    {
-        long[] A = new long[ 8 ];
-        for ( int i = 0; i < 8; i++ )
-        {
-            A[i] = toUnsignedLong( B[offset++] );
-        }
-        return A;
-    }
-
-    /**
-     * Support method for converting 4 bytes to unsigned ints by 'bit magic'.
-     *
-     * @param B the byte array
-     * @param offset the index of where to start
-     * @return an array of ints
-     */
-    private static int[] getUnsigned32BitValues( byte[] B, int offset )
-    {
-        int[] A = new int[ 4 ];
-        for ( int i = 0; i < 4; i++ )
-        {
-            A[i] = toUnsignedInt( B[offset++] );
-        }
-        return A;
-    }
-
-    /**
-     * Support method for converting 2 bytes to unsigned ints by 'bit magic'.
-     *
-     * @param B the byte array
-     * @param offset the index of where to start
-     * @return an array of ints
-     */
-    private static int[] getUnsigned16BitValues( byte[] B, int offset )
-    {
-        int[] A = new int[ 2 ];
-        for ( int i = 0; i < 2; i++ )
-        {
-            A[i] = toUnsignedInt( B[offset++] );
-        }
-        return A;
-    }
-
-    /**
-     * Method for parsing 16 bytes.
-     *
-     * @param input where to find the bytes
-     * @param offset where to start
-     * @return the number.
-     */
-    public static long parse64BitNumber( byte[] input, int offset )
-    {
-        long[] data = getUnsigned64BitValues( input, offset );
-        long i = data[0];
-        i += ( data[1] << 8 );
-        i += ( data[2] << 16 );
-        i += ( data[3] << 24 );
-        i += ( data[4] << 32 );
-        i += ( data[5] << 40 );
-        i += ( data[6] << 48 );
-        i += ( data[7] << 56 );
-        LOG.debug( "64 bit {} ==> {}", Arrays.toString( data ), i );
-        return i;
-    }
-
-    /**
-     * Method for parsing 4 bytes.
-     *
-     * @param input where to find the bytes
-     * @param offset where to start
-     * @return the number.
-     */
-    public static int parse32BitNumber( byte[] input, int offset )
-    {
-        int[] data = getUnsigned32BitValues( input, offset );
-        int i = data[0];
-        i += ( data[1] << 8 );
-        i += ( data[2] << 16 );
-        i += ( data[3] << 24 );
-        LOG.debug( "32 bit {} ==> {}", Arrays.toString( data ), i );
-        return i;
-    }
-
-    /**
-     * Method for parsing 2 bytes.
-     *
-     * @param input where to find the bytes
-     * @param offset where to start
-     * @return the number.
-     */
-    public static int parse16BitNumber( byte[] input, int offset )
-    {
-        int[] data = getUnsigned16BitValues( input, offset );
-        int i = data[0];
-        i += ( data[1] << 8 );
-        LOG.debug( "16 bit {} ==> ", Arrays.toString( data ), i );
-        return i;
-    }
-
-    /**
-     * Method for parsing 2 little endian bytes.
-     *
-     * @param data where to find the bytes
-     * @param offset where to start
-     * @return the number.
-     *
-     * static int parse16BitNumber(byte[] data, int offset) { return
-     * parse16BitNumber(data, offset, Endian.LITTLE); }
-     */
-    /**
-     * Method for parsing 1 byte.
-     *
-     * @param input where to find the bytes
-     * @param offset where to start
-     * @return the number.
-     */
-    public static int parse8BitNumber( byte[] input, int offset )
-    {
-        // Parse 1 byte
-        return toUnsignedInt( input[offset] );
     }
 
     /**
@@ -424,28 +268,6 @@ public final class ParseUtil
         M( 10, 1 ), M( 10, 2 ), M( 10, 3 ), M( 10, 4 ), M( 10, 5 ), M( 10, 6 ), M( 10, 7 ), M( 10, 8 ), M( 10, 9 ), M( 10, 10 ), M( 10, 11 ), M( 10, 12 ), M( 10, 13 ), M( 10, 14 ), M( 10, 15 ), M( 10, 16 ), M( 10, 17 ), M( 10, 18 ), M( 10, 19 ), M( 10, 20 ), M( 10, 21 ), M( 10, 22 ), M( 10, 23 ), M( 10, 24 ), M( 10, 25 ), M( 10, 26 ), M( 10, 27 ), M( 10, 28 ), M( 10, 29 ), M( 10, 30 ),
         M( 11, 1 ), M( 11, 2 ), M( 11, 3 ), M( 11, 4 ), M( 11, 5 ), M( 11, 6 ), M( 11, 7 ), M( 11, 8 ), M( 11, 9 ), M( 11, 10 ), M( 11, 11 ), M( 11, 12 ), M( 11, 13 ), M( 11, 14 ), M( 11, 15 ), M( 11, 16 ), M( 11, 17 ), M( 11, 18 ), M( 11, 19 ), M( 11, 20 ), M( 11, 21 ), M( 11, 22 ), M( 11, 23 ), M( 11, 24 ), M( 11, 25 ), M( 11, 26 ), M( 11, 27 ), M( 11, 28 ), M( 11, 29 ), M( 11, 30 ), M( 11, 31 )
     };
-
-    /**
-     * Method for getting a date converted to a string with a short month.
-     *
-     * @param date the date to parse
-     * @return the formatted string
-     */
-    public static String getShortDate( int[] date, Locale loc )
-    {
-        return new StringBuilder( new DateFormatSymbols( loc ).getShortMonths()[date[1]] ).append( " " ).append( date[0] ).append( " " ).append( date[2] ).toString();
-    }
-
-    /**
-     * Method for getting a date converted to a string with a long month.
-     *
-     * @param date the date to parse
-     * @return the formatted string
-     */
-    public static String getLongDate( int[] date, Locale loc )
-    {
-        return new StringBuilder( new DateFormatSymbols( loc ).getMonths()[date[1]] ).append( " " ).append( date[0] ).append( " " ).append( date[2] ).toString();
-    }
 
     /**
      * Support enum for converting dates.

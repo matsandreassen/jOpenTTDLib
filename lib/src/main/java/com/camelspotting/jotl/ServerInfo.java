@@ -22,6 +22,7 @@ import com.camelspotting.jotl.domain.Client;
 import com.camelspotting.jotl.parsing.ParseUtil;
 import com.camelspotting.jotl.parsing.Station;
 import com.camelspotting.jotl.parsing.Vehicle;
+import com.camelspotting.jotl.udp.BitUtil;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -98,15 +99,15 @@ public final class ServerInfo
             LOG.debug( "New company name seems to be {} characters long.", length );
             String compName = ParseUtil.parseString( data, i, length );
             i += length + 1;
-            int inaugurated = ParseUtil.parse32BitNumber( data, i );
+            int inaugurated = BitUtil.parse32BitNumber( data, i );
             i += 4;
-            long companyValue = ParseUtil.parse64BitNumber( data, i );
+            long companyValue = BitUtil.parse64BitNumber( data, i );
             i += 8;
-            long money = ParseUtil.parse64BitNumber( data, i );
+            long money = BitUtil.parse64BitNumber( data, i );
             i += 8;
-            long income = ParseUtil.parse64BitNumber( data, i );
+            long income = BitUtil.parse64BitNumber( data, i );
             i += 8;
-            int performance = ParseUtil.parse16BitNumber( data, i );
+            int performance = BitUtil.parse16BitNumber( data, i );
             i += 2;
             boolean passwordProtected = ( data[i++] == 1 );
 
@@ -117,7 +118,7 @@ public final class ServerInfo
             /* vehicle info */
             for ( Vehicle v : Vehicle.values() )
             {
-                com.setNumberOfVehicles( v, ParseUtil.parse16BitNumber( data, i ) );
+                com.setNumberOfVehicles( v, BitUtil.parse16BitNumber( data, i ) );
                 i += 2;
             }
             LOG.debug( "{} has {} vehicles.", com.getCurrentId(), com.getNumberOfVehicles() );
@@ -125,7 +126,7 @@ public final class ServerInfo
             /* station info */
             for ( Station s : Station.values() )
             {
-                com.setNumberOfStations( s, ParseUtil.parse16BitNumber( data, i ) );
+                com.setNumberOfStations( s, BitUtil.parse16BitNumber( data, i ) );
                 i += 2;
             }
             LOG.debug( "{} has {} stations.", com.getCurrentId(), com.getNumberOfStations() );
@@ -142,15 +143,15 @@ public final class ServerInfo
             LOG.debug( "New company name seems to be {} characters long.", length );
             String compName = ParseUtil.parseString( data, i, length );
             i += length + 1;
-            int inaugurated = ParseUtil.parse32BitNumber( data, i );
+            int inaugurated = BitUtil.parse32BitNumber( data, i );
             i += 4;
-            long companyValue = ParseUtil.parse64BitNumber( data, i );
+            long companyValue = BitUtil.parse64BitNumber( data, i );
             i += 8;
-            long money = ParseUtil.parse64BitNumber( data, i );
+            long money = BitUtil.parse64BitNumber( data, i );
             i += 8;
-            long income = ParseUtil.parse64BitNumber( data, i );
+            long income = BitUtil.parse64BitNumber( data, i );
             i += 8;
-            int performance = ParseUtil.parse16BitNumber( data, i );
+            int performance = BitUtil.parse16BitNumber( data, i );
             i += 2;
             boolean passwordProtected = ( data[i++] == 1 );
 
@@ -161,7 +162,7 @@ public final class ServerInfo
             /* vehicle info */
             for ( Vehicle v : Vehicle.values() )
             {
-                com.setNumberOfVehicles( v, ParseUtil.parse16BitNumber( data, i ) );
+                com.setNumberOfVehicles( v, BitUtil.parse16BitNumber( data, i ) );
                 i += 2;
             }
             LOG.debug( "{} has {} vehicles.", com.getCurrentId(), com.getNumberOfVehicles() );
@@ -169,7 +170,7 @@ public final class ServerInfo
             /* station info */
             for ( Station s : Station.values() )
             {
-                com.setNumberOfStations( s, ParseUtil.parse16BitNumber( data, i ) );
+                com.setNumberOfStations( s, BitUtil.parse16BitNumber( data, i ) );
                 i += 2;
             }
             LOG.debug( "{} has {} stations.", com.getCurrentId(), com.getNumberOfStations() );
@@ -186,7 +187,7 @@ public final class ServerInfo
                 String uniqueId = ParseUtil.parseString( data, i, length );
                 i += length + 1;
                 // join_date is transmitted in 
-                int[] joinDate = ParseUtil.parseDate( ParseUtil.parse32BitNumber( data, i ) );
+                int[] joinDate = ParseUtil.parseDate( BitUtil.parse32BitNumber( data, i ) );
                 i += 4;
 
                 Client client = new Client( cName, uniqueId, joinDate, false, com );
@@ -211,7 +212,7 @@ public final class ServerInfo
             length = ParseUtil.locateNextZero( data, i );
             String uniqueId = ParseUtil.parseString( data, i, length );
             i += length + 1;
-            int[] joinDate = ParseUtil.parseDate( ParseUtil.parse32BitNumber( data, i ) );
+            int[] joinDate = ParseUtil.parseDate( BitUtil.parse32BitNumber( data, i ) );
             i += 4;
 
             Client client = new Client( cName, uniqueId, joinDate, true, null );

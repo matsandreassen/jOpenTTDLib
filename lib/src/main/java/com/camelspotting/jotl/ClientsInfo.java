@@ -16,8 +16,7 @@
  */
 package com.camelspotting.jotl;
 
-import com.camelspotting.jotl.parsing.ParseUtil;
-import java.util.Arrays;
+import com.camelspotting.jotl.util.DateUtil;
 import java.util.Locale;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,27 +56,27 @@ public final class ClientsInfo
     /**
      * The maximum allowed companies
      */
-    private int companies_max;
+    private int maxCompanies;
     /**
      * The number of companies on at the moment
      */
-    private int companies_on;
+    private int onCompanies;
     /**
      * The maximum allowed spectators
      */
-    private int spectators_max;
+    private int maxSpectators;
     /**
      * The number of spectators on at the moment
      */
-    private int spectators_on;
+    private int onSpectators;
     /**
      * The maximum allowed clients
      */
-    private int clients_max;
+    private int maxClients;
     /**
      * The number of clients on at the moment
      */
-    private int clients_on;
+    private int onClients;
     /**
      * The game version
      */
@@ -89,7 +88,7 @@ public final class ClientsInfo
     /**
      * Whether the server is password protected
      */
-    private boolean password_protected;
+    private boolean passwordProtected;
     /**
      * Whether the server running dedicated
      */
@@ -101,118 +100,36 @@ public final class ClientsInfo
     /**
      * The current map's height
      */
-    private int map_height;
+    private int mapHeight;
     /**
      * The current map's width
      */
-    private int map_width;
+    private int mapWidth;
     /**
      * The current map's name
      */
-    private String map_name;
+    private String mapName;
 
-    /**
-     * The constructor parses the buffer for all interesting data that is
-     * contained within.
-     *
-     * @param data the buffer
-     */
-    public ClientsInfo( byte[] data )
+    public ClientsInfo( GRFRequest[] grfRequests, String serverName, int[] gameDate, int[] startDate, int maxCompanies, int onCompanies, int maxSpectators, int onSpectators, int maxClients, int onClients, int[] revision, int serverLang, boolean passwordProtected, boolean dedicated, int tileset, int mapHeight, int mapWidth, String mapName )
     {
-        int i = 3;
-        int version = data[i++];
-
-        switch ( version )
-        {
-            case 4:
-                LOG.info( "Processing version 4 data." );
-                this.grfRequests = new GRFRequest[ data[i++] ];
-                for ( int j = 0; j < grfRequests.length; j++ )
-                {
-                    String id = Integer.toHexString( ParseUtil.parse32BitNumber( data, i ) ).toUpperCase();
-                    i += 4;
-                    String md5 = "";
-                    for ( int k = 0; k < 16; k++ )
-                    {
-                        md5 += ParseUtil.parse8BitNumber( data, i++ );
-                    }
-                    md5 = md5.toUpperCase();
-                    grfRequests[j] = new GRFRequest( id, md5 );
-                }
-            case 3:
-                LOG.info( "Processing version 3 data." );
-                this.gameDate = ParseUtil.parseDate( ParseUtil.parse32BitNumber( data, i ) );
-                LOG.debug( "Game date: {}" , Arrays.toString( gameDate ) );
-                i += 4;
-                this.startDate = ParseUtil.parseDate( ParseUtil.parse32BitNumber( data, i ) );
-                LOG.debug( "Start date: {}", Arrays.toString( startDate ) );
-                i += 4;
-            case 2:
-                LOG.info( "Processing version 2 data." );
-                this.companies_max = data[i++];
-                this.companies_on = data[i++];
-                this.spectators_max = data[i++];
-            case 1:
-                LOG.info( "Processing version 1 data." );
-                int length = ParseUtil.locateNextZero( data, i );
-                LOG.debug( "Server name seems to be {} characters long.", length );
-                this.serverName = ParseUtil.parseString( data, i, length ).trim();
-                i += length + 1;
-                length = ParseUtil.locateNextZero( data, i );
-                LOG.debug( "Revision seems to be {} characters long.", length );
-                this.revision = ParseUtil.parseVersion( ParseUtil.parseString( data, i, length ).trim() );
-                i += length + 1;
-                this.serverLang = data[i++];
-                this.password_protected = data[i++] == 1;
-                this.clients_max = data[i++];
-                this.clients_on = data[i++];
-                this.spectators_on = data[i++];
-                length = ParseUtil.locateNextZero( data, i );
-                this.map_name = ParseUtil.parseString( data, i, length ).trim();
-                i += length + 1;
-                this.map_width = ParseUtil.parse16BitNumber( data, i );
-                i += 2;
-                this.map_height = ParseUtil.parse16BitNumber( data, i );
-                i += 2;
-                this.tileset = data[i++];
-                this.dedicated = ( data[i++] == 1 );
-        }
-        LOG.info( "Done parsing." );
-    }
-
-    /**
-     * This method is for parsing the SERVER_NEWGRFS-packet.
-     *
-     * @param data the data buffer received
-     */
-    void parseGRFNames( byte[] data )
-    {
-        LOG.debug( "Parsing GRF names." );
-        int i = 0;
-        int oldCount = grfRequests.length;
-        int newCount = ParseUtil.parse8BitNumber( data, i++ );
-
-        // Expand the GRFRequest array
-        GRFRequest[] newArray = new GRFRequest[ oldCount + newCount ];
-        System.arraycopy( grfRequests, 0, newArray, 0, oldCount );
-        grfRequests = newArray;
-
-        for ( int j = oldCount; j < ( oldCount + newCount ); j++ )
-        {
-            String id = Integer.toHexString( ParseUtil.parse8BitNumber( data, i++ ) ).toUpperCase();
-            String md5 = "";
-            for ( int k = 0; k < 16; k++ )
-            {
-                md5 += ParseUtil.parse32BitNumber( data, i );
-                i += 4;
-            }
-            md5 = md5.toUpperCase();
-            int length = ParseUtil.locateNextZero( data, i );
-            String name = ParseUtil.parseString( data, i, length );
-            i += length + 1;
-            grfRequests[j] = new GRFRequest( id, md5, name );
-        }
-        LOG.debug( "Done parsing GRF names." );
+        this.grfRequests = grfRequests;
+        this.serverName = serverName;
+        this.gameDate = gameDate;
+        this.startDate = startDate;
+        this.maxCompanies = maxCompanies;
+        this.onCompanies = onCompanies;
+        this.maxSpectators = maxSpectators;
+        this.onSpectators = onSpectators;
+        this.maxClients = maxClients;
+        this.onClients = onClients;
+        this.revision = revision;
+        this.serverLang = serverLang;
+        this.passwordProtected = passwordProtected;
+        this.dedicated = dedicated;
+        this.tileset = tileset;
+        this.mapHeight = mapHeight;
+        this.mapWidth = mapWidth;
+        this.mapName = mapName;
     }
 
     /**
@@ -279,7 +196,7 @@ public final class ClientsInfo
      */
     public String getLongStartDate()
     {
-        return ParseUtil.getLongDate( startDate, Locale.UK );
+        return DateUtil.getLongDate( startDate, Locale.UK );
     }
 
     /**
@@ -290,7 +207,7 @@ public final class ClientsInfo
      */
     public String getShortStartDate()
     {
-        return ParseUtil.getShortDate( startDate, Locale.UK );
+        return DateUtil.getShortDate( startDate, Locale.UK );
     }
 
     /**
@@ -312,7 +229,7 @@ public final class ClientsInfo
      */
     public String getLongGameDate()
     {
-        return ParseUtil.getLongDate( gameDate, Locale.UK );
+        return DateUtil.getLongDate( gameDate, Locale.UK );
     }
 
     /**
@@ -323,7 +240,7 @@ public final class ClientsInfo
      */
     public String getShortGameDate()
     {
-        return ParseUtil.getShortDate( gameDate, Locale.UK );
+        return DateUtil.getShortDate( gameDate, Locale.UK );
     }
 
     /**
@@ -333,7 +250,7 @@ public final class ClientsInfo
      */
     public int getMaxNumberOfCompanies()
     {
-        return companies_max;
+        return maxCompanies;
     }
 
     /**
@@ -343,7 +260,7 @@ public final class ClientsInfo
      */
     public int getNumberOfActiveCompanies()
     {
-        return companies_on;
+        return onCompanies;
     }
 
     /**
@@ -353,7 +270,7 @@ public final class ClientsInfo
      */
     public int getMaxNumberOfSpectators()
     {
-        return spectators_max;
+        return maxSpectators;
     }
 
     /**
@@ -363,7 +280,7 @@ public final class ClientsInfo
      */
     public int getNumberOfActiveSpectators()
     {
-        return spectators_on;
+        return onSpectators;
     }
 
     /**
@@ -373,7 +290,7 @@ public final class ClientsInfo
      */
     public int getMaxNumberOfClients()
     {
-        return clients_max;
+        return maxClients;
     }
 
     /**
@@ -383,7 +300,7 @@ public final class ClientsInfo
      */
     public int getNumberOfActiveClients()
     {
-        return clients_on;
+        return onClients;
     }
 
     /**
@@ -393,7 +310,7 @@ public final class ClientsInfo
      */
     public boolean isPasswordProtected()
     {
-        return password_protected;
+        return passwordProtected;
     }
 
     /**
@@ -455,7 +372,7 @@ public final class ClientsInfo
      */
     public int getMapWidth()
     {
-        return map_width;
+        return mapWidth;
     }
 
     /**
@@ -465,7 +382,7 @@ public final class ClientsInfo
      */
     public int getMapHeight()
     {
-        return map_height;
+        return mapHeight;
     }
 
     /**
@@ -475,7 +392,7 @@ public final class ClientsInfo
      */
     public String getMapName()
     {
-        return map_name;
+        return mapName;
     }
 
     /**
