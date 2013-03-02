@@ -106,7 +106,7 @@ public final class JOTLQuerier implements Comparable<JOTLQuerier>
         {
             socket = new DatagramSocket( localPort );
             socket.setSoTimeout( timeout );
-            LOG.info( "Pinging OpenTTD server at {}.", server.getIpAddress() );
+            LOG.info( "Pinging {}.", server );
             socket.send( PacketType.CLIENT_FIND_SERVER.createPacket( server.getAddress(), destPort ) );
             DatagramPacket dp = new DatagramPacket( new byte[ maxPacketSize ], maxPacketSize );
             socket.receive( dp );
@@ -180,7 +180,7 @@ public final class JOTLQuerier implements Comparable<JOTLQuerier>
             byte[] data = testConfiguration( server, fromPort, destPort, 2000 );
             if ( data == null )
             {
-                throw new JOTLException( "No server replies on this address and port." );
+                throw new JOTLException( String.format("No reply from %s.", server) );
             }
             else if ( queryInfo )
             {
