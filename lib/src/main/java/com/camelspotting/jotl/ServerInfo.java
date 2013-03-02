@@ -38,7 +38,7 @@ public final class ServerInfo
     /**
      * The logger object for this class
      */
-    private static final Logger LOG = LoggerFactory.getLogger( ClientsInfo.class );
+    private static final Logger LOG = LoggerFactory.getLogger( Clients.class );
     /**
      * All companies
      */

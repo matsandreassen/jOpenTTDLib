@@ -35,7 +35,7 @@ public class Game
     /**
      * One of the objects that will contain gathered information
      */
-    private ClientsInfo clientsInfo;
+    private Clients clientsInfo;
     /**
      * One of the objects that will contain gathered information
      */
@@ -51,7 +51,7 @@ public class Game
      * @param clientsInfo the information to contain
      * @param serverInfo more information to contain
      */
-    Game( ClientsInfo sri, ServerInfo sdi )
+    Game( Clients sri, ServerInfo sdi )
     {
         this.id = ++Game.id_inc;
         this.clientsInfo = sri;
@@ -63,7 +63,7 @@ public class Game
      *
      * @return the {@link ClientsInfo} object
      */
-    public ClientsInfo getServeInfo()
+    public Clients getServeInfo()
     {
         return clientsInfo;
     }

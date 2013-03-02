@@ -16,6 +16,7 @@
  */
 package com.camelspotting.jotl;
 
+import com.camelspotting.jotl.domain.Server;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.text.DateFormatSymbols;
@@ -341,20 +342,18 @@ public final class Parser
      * @return an {@link InetAddress}-object
      * @throws java.net.UnknownHostException
      */
-    static InetAddress parseHost( String host ) throws UnknownHostException
+    static Server parseHost( String host ) throws UnknownHostException
     {
-        InetAddress addr;
         if ( Pattern.matches( ipv4Pattern, host ) )
         {
-            addr = parseIPv4( host );
-        } /*else if (Pattern.matches(ipv6Pattern, host)) {
-         addr = parseIPv6(host);
-         } */ else
-        { // Try to resolve through DNS
-            addr = InetAddress.getByName( host );
-            LOG.debug( "{} was resolved to {}", host, addr.getHostAddress() );
+            return new Server( host, parseIPv4( host ) );
         }
-        return addr;
+        else
+        {   // Try to resolve through DNS
+            InetAddress address = InetAddress.getByName( host );
+            LOG.debug( "{} was resolved to {}", host, address.getHostAddress() );
+            return new Server( host, address.getHostAddress(), address );
+        }
     }
 
     /**

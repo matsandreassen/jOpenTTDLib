@@ -16,10 +16,10 @@
  */
 package com.camelspotting.jotl;
 
+import com.camelspotting.jotl.domain.Server;
 import com.camelspotting.jotl.event.OpenTTDEvent;
 import com.camelspotting.jotl.event.OpenTTDEventType;
 import com.camelspotting.jotl.event.OpenTTDListener;
-import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -43,7 +43,7 @@ public class ServerHandler
     /**
      * The host being monitored
      */
-    private InetAddress monitoredHost;
+    private Server monitoredServer;
     /**
      * The update interval in milliseconds
      */
@@ -118,7 +118,7 @@ public class ServerHandler
      */
     public ServerHandler( String host, int localPort, int remotePort, int updateInterval, boolean updateNow, OpenTTDListener... otls ) throws UnknownHostException, JOTLException
     {
-        this.monitoredHost = Parser.parseHost( host );
+        this.monitoredServer = Parser.parseHost( host );
         this.updateInterval = updateInterval;
         this.fromPort = localPort;
         this.destPort = remotePort;
@@ -169,7 +169,7 @@ public class ServerHandler
      */
     public String getServerName()
     {
-        return monitoredHost.getCanonicalHostName();
+        return monitoredServer.getAddress().getCanonicalHostName();
     }
 
     /**
@@ -305,7 +305,7 @@ public class ServerHandler
      */
     public final synchronized void update() throws JOTLException
     {
-        currentUpdate = new JOTLQuerier( monitoredHost, fromPort, destPort, true );
+        currentUpdate = new JOTLQuerier( monitoredServer, fromPort, destPort, true );
         checkForEvents();
     }
 
@@ -639,8 +639,8 @@ public class ServerHandler
             return false;
         }
 
-        ClientsInfo sriOld = lastUpdate.getServerResponseInfo();
-        ClientsInfo sriNew = curUpdate.getServerResponseInfo();
+        Clients sriOld = lastUpdate.getServerResponseInfo();
+        Clients sriNew = curUpdate.getServerResponseInfo();
         ServerInfo sdiOld = lastUpdate.getServerDetailedInfo();
         ServerInfo sdiNew = curUpdate.getServerDetailedInfo();
 

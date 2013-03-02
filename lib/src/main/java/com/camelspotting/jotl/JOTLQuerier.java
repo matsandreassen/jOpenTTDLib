@@ -16,6 +16,7 @@
  */
 package com.camelspotting.jotl;
 
+import com.camelspotting.jotl.domain.Server;
 import java.io.IOException;
 import java.net.BindException;
 import java.net.DatagramPacket;
@@ -53,9 +54,9 @@ public final class JOTLQuerier implements Comparable<JOTLQuerier>
      */
     private static final int maxPacketSize = 1000;
     /**
-     * This is the server address
+     * This is the server
      */
-    private InetAddress address;
+    private Server server;
     /**
      * The local port
      */
@@ -71,7 +72,7 @@ public final class JOTLQuerier implements Comparable<JOTLQuerier>
     /**
      * One of the objects that will contain gathered information
      */
-    private ClientsInfo serverResponseInfo;
+    private Clients serverResponseInfo;
     /**
      * One of the objects that will contain gathered information
      */
@@ -93,7 +94,7 @@ public final class JOTLQuerier implements Comparable<JOTLQuerier>
      * This is a method for checking whether there is a server listening at this
      * address and at the remote port.
      *
-     * @param addr the address to look up
+     * @param server the address to look up
      * @param localPort the local port to use
      * @param destPort the remote port to use
      * @param timeout number of milliseconds to wait for reply
@@ -101,7 +102,7 @@ public final class JOTLQuerier implements Comparable<JOTLQuerier>
      * CLIENT_FIND_SERVER-packet
      * @see SendablePacketType
      */
-    static byte[] testConfiguration( InetAddress addr, int localPort, int destPort, int timeout )
+    static byte[] testConfiguration( Server server, int localPort, int destPort, int timeout )
     {
         // Send a test packet to see if there is an OpenTTD-server at location
         DatagramSocket socket = null;
@@ -109,8 +110,8 @@ public final class JOTLQuerier implements Comparable<JOTLQuerier>
         {
             socket = new DatagramSocket( localPort );
             socket.setSoTimeout( timeout );
-            LOG.info( "Pinging OpenTTD server at {}.", addr.getHostAddress() );
-            socket.send( PacketType.CLIENT_FIND_SERVER.createPacket( addr, destPort ) );
+            LOG.info( "Pinging OpenTTD server at {}.", server.getIpAddress() );
+            socket.send( PacketType.CLIENT_FIND_SERVER.createPacket( server.getAddress(), destPort ) );
             DatagramPacket dp = new DatagramPacket( new byte[ maxPacketSize ], maxPacketSize );
             socket.receive( dp );
             LOG.info( "We got a reply! There is most definitely something there." );
@@ -151,10 +152,10 @@ public final class JOTLQuerier implements Comparable<JOTLQuerier>
      * @param queryInfo whether to query server immidiately
      * @see ServerHandler
      */
-    JOTLQuerier( InetAddress addr, int fromPort, int destPort, boolean queryInfo ) throws JOTLException
+    JOTLQuerier( Server server, int fromPort, int destPort, boolean queryInfo ) throws JOTLException
     {
         this.timeStamp = System.currentTimeMillis();
-        this.address = addr;
+        this.server = server;
         this.fromPort = fromPort;
         this.destPort = destPort;
         if ( queryInfo )
@@ -179,8 +180,8 @@ public final class JOTLQuerier implements Comparable<JOTLQuerier>
         this.destPort = destPort;
         try
         {
-            this.address = Parser.parseHost( host );
-            byte[] data = testConfiguration( address, fromPort, destPort, 2000 );
+            this.server = Parser.parseHost( host );
+            byte[] data = testConfiguration( server, fromPort, destPort, 2000 );
             if ( data == null )
             {
                 throw new JOTLException( "No server replies on this address and port." );
@@ -280,7 +281,7 @@ public final class JOTLQuerier implements Comparable<JOTLQuerier>
              }
              querypacket = createNewGRFSPacket();
              } else {*/
-            querypacket = pt.createPacket( address, destPort );
+            querypacket = pt.createPacket( server.getAddress(), destPort );
             //}
             socket.send( querypacket );
             LOG.debug( "Packet of type {} sent.", pt.toString() );
@@ -341,7 +342,7 @@ public final class JOTLQuerier implements Comparable<JOTLQuerier>
         {
             case SERVER_RESPONSE:
                 LOG.info( "Parsing server response information." );
-                this.serverResponseInfo = new ClientsInfo( data );
+                this.serverResponseInfo = new Clients( data );
                 LOG.info( "Server response information parsed." );
                 break;
             case SERVER_DETAIL_INFO:
@@ -405,7 +406,7 @@ public final class JOTLQuerier implements Comparable<JOTLQuerier>
      * @return the current {@link ClientsInfo} object or null if no info has
      * been collected
      */
-    public ClientsInfo getServerResponseInfo()
+    public Clients getServerResponseInfo()
     {
         return serverResponseInfo;
     }
