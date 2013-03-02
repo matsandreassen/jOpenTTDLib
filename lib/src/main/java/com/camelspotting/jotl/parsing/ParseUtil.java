@@ -342,17 +342,17 @@ public final class ParseUtil
      * @return an {@link InetAddress}-object
      * @throws java.net.UnknownHostException
      */
-    public static Server parseHost( String host ) throws UnknownHostException
+    public static Server parseHost( String host, int port ) throws UnknownHostException
     {
         if ( Pattern.matches( ipv4Pattern, host ) )
         {
-            return new Server( host, parseIPv4( host ) );
+            return new Server( host, port, parseIPv4( host ) );
         }
         else
         {   // Try to resolve through DNS
             InetAddress address = InetAddress.getByName( host );
             LOG.debug( "{} was resolved to {}", host, address.getHostAddress() );
-            return new Server( host, address.getHostAddress(), address );
+            return new Server( host, address.getHostAddress(), port, address );
         }
     }
 

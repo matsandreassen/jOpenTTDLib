@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.net.BindException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.Arrays;
@@ -78,10 +77,6 @@ public final class JOTLQuerier implements Comparable<JOTLQuerier>
      * One of the objects that will contain gathered information
      */
     private ServerInfo serverDetailedInfo;
-    /**
-     * Whether or not to print debug messages.
-     */
-    public static boolean debug = false;
     /**
      * boolean for hindering data of being overwritten
      */
@@ -181,7 +176,7 @@ public final class JOTLQuerier implements Comparable<JOTLQuerier>
         this.destPort = destPort;
         try
         {
-            this.server = ParseUtil.parseHost( host );
+            this.server = ParseUtil.parseHost( host, destPort );
             byte[] data = testConfiguration( server, fromPort, destPort, 2000 );
             if ( data == null )
             {
@@ -228,16 +223,6 @@ public final class JOTLQuerier implements Comparable<JOTLQuerier>
     public JOTLQuerier( String host ) throws JOTLException
     {
         this( host, 2222, 3979, true );
-    }
-
-    /**
-     * This method is for making the program print out debug messages to stdout.
-     *
-     * @param on whether or not to print messages
-     */
-    public void setDebugMode( boolean on )
-    {
-        debug = on;
     }
 
     /**

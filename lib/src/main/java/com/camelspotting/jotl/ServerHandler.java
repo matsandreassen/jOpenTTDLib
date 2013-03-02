@@ -16,6 +16,7 @@
  */
 package com.camelspotting.jotl;
 
+import com.camelspotting.jotl.domain.Client;
 import com.camelspotting.jotl.parsing.ParseUtil;
 import com.camelspotting.jotl.domain.Server;
 import com.camelspotting.jotl.event.OpenTTDEvent;
@@ -121,7 +122,7 @@ public class ServerHandler
      */
     public ServerHandler( String host, int localPort, int remotePort, int updateInterval, boolean updateNow, OpenTTDListener... otls ) throws UnknownHostException, JOTLException
     {
-        this.monitoredServer = ParseUtil.parseHost( host );
+        this.monitoredServer = ParseUtil.parseHost( host, remotePort );
         this.updateInterval = updateInterval;
         this.fromPort = localPort;
         this.destPort = remotePort;
