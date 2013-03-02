@@ -383,8 +383,8 @@ public class ServerHandler
                 if ( lastUpdate != null )
                 {
                     // Did any clients join/leave?
-                    List<Client> oldClients = lastUpdate.getServerInfo().getAllClients();
-                    List<Client> newClients = currentUpdate.getServerInfo().getAllClients();
+                    List<Client> oldClients = lastUpdate.getServerInfo().getClients();
+                    List<Client> newClients = currentUpdate.getServerInfo().getClients();
                     List<OpenTTDEvent> joinEvents = checkForClientsJoined( oldClients, newClients );
                     List<OpenTTDEvent> leftEvents = checkForClientsLeft( oldClients, newClients );
 
@@ -393,7 +393,7 @@ public class ServerHandler
                 }
                 else
                 {
-                    List<Client> newClients = currentUpdate.getServerInfo().getAllClients();
+                    List<Client> newClients = currentUpdate.getServerInfo().getClients();
                     if ( newClients.size() > 0 )
                     {
                         evts.add( new OpenTTDEvent( OpenTTDEventType.CLIENT_JOIN, (Object[]) newClients.toArray( new Client[ newClients.size() ] ) ) );

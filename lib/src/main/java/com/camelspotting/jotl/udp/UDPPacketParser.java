@@ -2,8 +2,15 @@ package com.camelspotting.jotl.udp;
 
 import com.camelspotting.jotl.ClientsInfo;
 import com.camelspotting.jotl.GRFRequest;
+import com.camelspotting.jotl.ServerInfo;
+import com.camelspotting.jotl.domain.Client;
+import com.camelspotting.jotl.domain.Company;
 import com.camelspotting.jotl.parsing.ParseUtil;
+import com.camelspotting.jotl.parsing.Station;
+import com.camelspotting.jotl.parsing.Vehicle;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,9 +39,166 @@ public class UDPPacketParser
      * @param data
      * @return
      */
-//    public static ServerInfo parseServerInfo( byte[] data )
-//    {
-//    }
+    public static ServerInfo parseServerInfo( byte[] data )
+    {
+        int i = 3;
+        int version = data[i++];
+        int activePlayers = data[i++];
+
+        switch ( version )
+        {
+            case 6:
+            case 5:
+                return parseVersion5( data, activePlayers, i );
+            case 4:
+            case 3:
+            case 2:
+            case 1:
+                return parseVersion4( data, activePlayers, i );
+            default:
+                throw new IllegalArgumentException( String.format( "Unsupported packet version: %d", version ) );
+        }
+    }
+
+    private static ServerInfo parseVersion5( byte[] data, int activePlayers, int i )
+    {
+        LOG.info( "Parsing version 5 info." );
+        List<Company> companies = new ArrayList<Company>();
+        for ( int j = 0; j < activePlayers; j++ )
+        {
+            int current = data[i++];
+            int length = ParseUtil.locateNextZero( data, i );
+            LOG.debug( "New company name seems to be {} characters long.", length );
+            String compName = ParseUtil.parseString( data, i, length );
+            i += length + 1;
+            int inaugurated = BitUtil.parse32BitNumber( data, i );
+            i += 4;
+            long companyValue = BitUtil.parse64BitNumber( data, i );
+            i += 8;
+            long money = BitUtil.parse64BitNumber( data, i );
+            i += 8;
+            long income = BitUtil.parse64BitNumber( data, i );
+            i += 8;
+            int performance = BitUtil.parse16BitNumber( data, i );
+            i += 2;
+            boolean passwordProtected = ( data[i++] == 1 );
+
+            Company com = new Company( current, compName, inaugurated, companyValue, money, income, performance, passwordProtected );
+            LOG.debug( "Created {}.", com );
+            companies.add( com );
+
+            /* vehicle info */
+            for ( Vehicle v : Vehicle.values() )
+            {
+                com.setNumberOfVehicles( v, BitUtil.parse16BitNumber( data, i ) );
+                i += 2;
+            }
+            LOG.debug( "{} has {} vehicles.", com.getCurrentId(), com.getNumberOfVehicles() );
+
+            /* station info */
+            for ( Station s : Station.values() )
+            {
+                com.setNumberOfStations( s, BitUtil.parse16BitNumber( data, i ) );
+                i += 2;
+            }
+            LOG.debug( "{} has {} stations.", com.getCurrentId(), com.getNumberOfStations() );
+        }
+
+        return new ServerInfo( companies, null, 5 );
+    }
+
+    private static ServerInfo parseVersion4( byte[] data, int activePlayers, int i )
+    {
+        LOG.info( "Parsing version 4 info." );
+        List<Company> companies = new ArrayList<Company>();
+        List<Client> clients = new ArrayList<Client>();
+        for ( int j = 0; j < activePlayers; j++ )
+        {
+            int current = data[i++];
+            int length = ParseUtil.locateNextZero( data, i );
+            LOG.debug( "New company name seems to be {} characters long.", length );
+            String compName = ParseUtil.parseString( data, i, length );
+            i += length + 1;
+            int inaugurated = BitUtil.parse32BitNumber( data, i );
+            i += 4;
+            long companyValue = BitUtil.parse64BitNumber( data, i );
+            i += 8;
+            long money = BitUtil.parse64BitNumber( data, i );
+            i += 8;
+            long income = BitUtil.parse64BitNumber( data, i );
+            i += 8;
+            int performance = BitUtil.parse16BitNumber( data, i );
+            i += 2;
+            boolean passwordProtected = ( data[i++] == 1 );
+
+            Company com = new Company( current, compName, inaugurated, companyValue, money, income, performance, passwordProtected );
+            LOG.debug( "Created company: {}", com );
+            companies.add( com );
+
+            /* vehicle info */
+            for ( Vehicle v : Vehicle.values() )
+            {
+                com.setNumberOfVehicles( v, BitUtil.parse16BitNumber( data, i ) );
+                i += 2;
+            }
+            LOG.debug( "{} has {} vehicles.", com.getCurrentId(), com.getNumberOfVehicles() );
+
+            /* station info */
+            for ( Station s : Station.values() )
+            {
+                com.setNumberOfStations( s, BitUtil.parse16BitNumber( data, i ) );
+                i += 2;
+            }
+            LOG.debug( "{} has {} stations.", com.getCurrentId(), com.getNumberOfStations() );
+
+            /* Get a list of clients connected to this company.
+             * At this point we read a boolean value from the buffer, if > 0 there is another client
+             */
+            while ( data[i++] > 0 )
+            {
+                length = ParseUtil.locateNextZero( data, i );
+                String cName = ParseUtil.parseString( data, i, length );
+                i += length + 1;
+                length = ParseUtil.locateNextZero( data, i );
+                String uniqueId = ParseUtil.parseString( data, i, length );
+                i += length + 1;
+                // join_date is transmitted in 
+                LocalDate joinDate = DateUtil.convertDateToYMD( BitUtil.parse32BitNumber( data, i ) );
+                i += 4;
+
+                Client client = new Client( cName, uniqueId, joinDate, false, com );
+                LOG.debug( "Found '{}' connected to company {}.", client, com.getCurrentId() );
+                com.addClient( client );
+                clients.add( client );
+            }
+        }
+
+        // Now let's parse any spectators
+        while ( data[i++] > 0 )
+        {
+            int length = ParseUtil.locateNextZero( data, i );
+            String cName = ParseUtil.parseString( data, i, length );
+            // If this is the unreal spectator that is always present on the server.
+            if ( cName.equals( "" ) )
+            {
+                LOG.debug( "Ignoring unreal spectator." );
+                continue;
+            }
+            i += length + 1;
+            length = ParseUtil.locateNextZero( data, i );
+            String uniqueId = ParseUtil.parseString( data, i, length );
+            i += length + 1;
+            LocalDate joinDate = DateUtil.convertDateToYMD( BitUtil.parse32BitNumber( data, i ) );
+            i += 4;
+
+            Client client = new Client( cName, uniqueId, joinDate, true, null );
+            LOG.debug( "Found spectator '" + client + "'." );
+            clients.add( client );
+        }
+
+        return new ServerInfo( companies, clients, 4 );
+    }
+
     /**
      * Based on OpenTTD source code:
      * <ul>
