@@ -114,7 +114,7 @@ public class ServerMonitor
     public ServerMonitor( GameQuerier gameQuerier, int updateInterval, boolean updateNow, OpenTTDListener... otls ) throws JOTLException
     {
         this.updateInterval = updateInterval;
-        addOpenTTDListeners( otls ); // This will do nothing if otl is null
+        addListeners( otls ); // This will do nothing if otl is null
         if ( updateNow )
         {
             update();
@@ -379,7 +379,7 @@ public class ServerMonitor
         // from the SERVER_DETAILED_INFO-packet so the methods for
         // getting clients/spectators now throws exception if UDP-version
         // is higher than 4.
-        if ( lastUpdate.getClientDetails() instanceof ClientsDetailsV4 )
+        if ( lastUpdate != null && lastUpdate.getClientDetails() instanceof ClientsDetailsV4 )
         {
             if ( lastUpdate != null )
             {
@@ -852,7 +852,7 @@ public class ServerMonitor
     {
         for ( OpenTTDListener otl : listeners )
         {
-            LOG.debug( "'{}' has been notified of event: ''.", otl, evt );
+            LOG.debug( "'{}' has been notified of event: '{}'.", otl, evt );
             otl.eventOccured( evt );
         }
     }
@@ -862,7 +862,7 @@ public class ServerMonitor
      *
      * @param otls the listener to add
      */
-    public final void addOpenTTDListeners( OpenTTDListener... otls )
+    public final void addListeners( OpenTTDListener... otls )
     {
         if ( listeners == null )
         {
@@ -870,8 +870,15 @@ public class ServerMonitor
         }
         for ( OpenTTDListener otl : otls )
         {
-            LOG.debug( "Adding listener {}.", otl );
-            listeners.add( otl );
+            if ( otl != null )
+            {
+                LOG.debug( "Adding listener {}.", otl );
+                listeners.add( otl );
+            }
+            else
+            {
+                LOG.debug( "A 'null' listener was attempted added." );
+            }
         }
     }
 
@@ -880,13 +887,16 @@ public class ServerMonitor
      *
      * @param otls the listeners to remove
      */
-    public final void removeOpenTTDListener( OpenTTDListener... otls )
+    public final void removeListeners( OpenTTDListener... otls )
     {
         if ( listeners != null )
         {
             for ( OpenTTDListener otl : otls )
             {
-                listeners.remove( otl );
+                if ( listeners.contains( otl ) )
+                {
+                    listeners.remove( otl );
+                }
             }
         }
     }
