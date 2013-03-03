@@ -126,29 +126,6 @@ public class Company implements Comparable<Company>
     }
 
     /**
-     * Method for setting how many vehicles a company has.
-     *
-     * @param vehicle the vehicle to update
-     * @param value the value to set
-     */
-    public void setNumberOfVehicles( Vehicle vehicle, int value )
-    {
-        vehicleCountMap.put( vehicle, value );
-    }
-
-    /**
-     * Method for setting how many stations a company has.
-     *
-     * @param station the station to update
-     * @param value the value to set
-     * @see ServerInfo#stations
-     */
-    public void setNumberOfStations( Station station, int value )
-    {
-        stationCountMap.put( station, value );
-    }
-
-    /**
      * Method for accessing how many vehicles a company has. Match the indices
      * in this array with the {@link ServerInfo#vehicles} array to find out what
      * number is what kind of vehicle.
