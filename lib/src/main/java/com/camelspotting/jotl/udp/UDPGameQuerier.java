@@ -90,7 +90,7 @@ public final class UDPGameQuerier implements GameQuerier
         try
         {
             socket = bind();
-            sendPacket( socket, PacketType.CLIENT_DETAIL_INFO );
+            sendPacket( socket, PacketType.CLIENT_FIND_SERVER );
             byte[] reply = recieve( socket );
             return UDPPacketParser.parseServerDetails(reply );
         }
@@ -115,7 +115,7 @@ public final class UDPGameQuerier implements GameQuerier
         try
         {
             socket = bind();
-            sendPacket( socket, PacketType.CLIENT_FIND_SERVER );
+            sendPacket( socket, PacketType.CLIENT_DETAIL_INFO );
             byte[] reply = recieve( socket );
             PacketType type = PacketType.fromInt( reply[2] );
             return UDPPacketParser.parseClientsDetails( reply );
