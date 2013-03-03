@@ -39,10 +39,10 @@ import org.slf4j.LoggerFactory;
  * @author Mats Andreassen
  * @version 1.0
  */
-public class ServerHandler
+public class ServerMonitor
 {
 
-    private static final Logger LOG = LoggerFactory.getLogger( ServerHandler.class );
+    private static final Logger LOG = LoggerFactory.getLogger( ServerMonitor.class );
     /**
      * The listeners that are to be notified of events
      */
@@ -111,7 +111,7 @@ public class ServerHandler
      * @param otls any initial listeners?
      * @see #start()
      */
-    public ServerHandler( GameQuerier gameQuerier, int updateInterval, boolean updateNow, OpenTTDListener... otls ) throws JOTLException
+    public ServerMonitor( GameQuerier gameQuerier, int updateInterval, boolean updateNow, OpenTTDListener... otls ) throws JOTLException
     {
         this.updateInterval = updateInterval;
         addOpenTTDListeners( otls ); // This will do nothing if otl is null

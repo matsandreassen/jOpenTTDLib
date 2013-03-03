@@ -16,7 +16,7 @@
  */
 package com.camelspotting.jotl.domain;
 
-import com.camelspotting.jotl.ServerHandler;
+import com.camelspotting.jotl.ServerMonitor;
 
 /**
  * This method is is just a wrapper for response and detail information, and is
