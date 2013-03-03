@@ -5,6 +5,7 @@ import com.camelspotting.jotl.GRFRequest;
 import com.camelspotting.jotl.ClientsDetails;
 import com.camelspotting.jotl.domain.Client;
 import com.camelspotting.jotl.domain.Company;
+import com.camelspotting.jotl.exceptions.JOTLException;
 import com.camelspotting.jotl.parsing.ParseUtil;
 import com.camelspotting.jotl.parsing.Station;
 import com.camelspotting.jotl.parsing.Vehicle;
@@ -23,6 +24,10 @@ public class UDPPacketParser
 {
 
     private static final Logger LOG = LoggerFactory.getLogger( UDPPacketParser.class );
+    /**
+     * The length of the metadata segment
+     */
+    private static final int METADATA_LENGTH = 4;
 
     private UDPPacketParser()
     {
@@ -40,10 +45,13 @@ public class UDPPacketParser
      * @see PacketType#CLIENT_DETAIL_INFO
      * @return
      */
-    public static ClientsDetails parseClientsDetails( byte[] data )
+    public static ClientsDetails parseClientsDetails( byte[] data ) throws JOTLException
     {
-        int i = 3;
-        int version = data[i++];
+        PacketMetadata pm = verifyMetadata( data, PacketType.SERVER_DETAIL_INFO );
+        int version = pm.getVersion();
+        data = stripMetadata( data );
+        
+        int i = 0;
         int activePlayers = data[i++];
 
         switch ( version )
@@ -212,14 +220,13 @@ public class UDPPacketParser
      * @see PacketType#SERVER_RESPONSE
      * @return
      */
-    public static ServerDetails parseServerDetails( byte[] data )
+    public static ServerDetails parseServerDetails( byte[] data ) throws JOTLException
     {
-        data = Arrays.copyOfRange( data, 3, data.length );
+        PacketMetadata pm = verifyMetadata( data, PacketType.SERVER_RESPONSE );
+        int version = pm.getVersion();
+        data = stripMetadata( data );
+
         int i = 0;
-        int version = data[i++];
-
-        LOG.debug( "Parsing version {} packet, length {}: {}", version, data.length, Arrays.toString( data ) );
-
         GRFRequest[] grfs = null;
         if ( version >= 4 )
         {
@@ -292,6 +299,38 @@ public class UDPPacketParser
         LOG.info( "Done parsing." );
 
         return new ServerDetails( grfs, serverName, gameDate, startDate, maxNumberOfCompanies, numberOfActiveCompanies, maximumNumberOfSpectators, numberOfSpectatorsOn, maximumNumberOfClients, numberOfActiveClients, gameVersion, serverLang, passwordProtected, dedicated, tileset, mapHeight, mapWidth, mapName );
+    }
+
+    /**
+     * This method returns a "subarray", stripping the metadata
+     *
+     * @param input
+     * @return
+     * @see #METADATA_LENGTH
+     */
+    private static byte[] stripMetadata( byte[] input )
+    {
+        return Arrays.copyOfRange( input, METADATA_LENGTH, input.length );
+    }
+
+    /**
+     * This method verifies that the packet is of the desired type.
+     *
+     * @param data the packet data
+     * @param packetType the desired packet type
+     * @return packet metadata
+     * @throws JOTLException when the specified packet is of the wrong type
+     */
+    private static PacketMetadata verifyMetadata( byte[] data, PacketType packetType ) throws JOTLException
+    {
+        PacketMetadata pm = PacketMetadata.parseMetadata( data );
+        if ( pm.getType() != packetType )
+        {
+            throw new JOTLException( String.format( "Expected packet type: %s. Received: %s.", packetType, pm.getType() ) );
+        }
+
+        LOG.debug( "Verified {}. Data: {}", pm, Arrays.toString( data ) );
+        return pm;
     }
 //
 //    /**

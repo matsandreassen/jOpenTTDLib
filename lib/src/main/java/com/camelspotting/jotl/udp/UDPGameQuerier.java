@@ -92,13 +92,6 @@ public final class UDPGameQuerier implements GameQuerier
             socket = bind();
             sendPacket( socket, PacketType.CLIENT_DETAIL_INFO );
             byte[] reply = recieve( socket );
-            PacketType type = PacketType.fromInt( reply[2] );
-
-            if ( type != PacketType.SERVER_DETAIL_INFO )
-            {
-                throw new JOTLException( String.format( "Expected packet type: %s. Received: %s.", PacketType.CLIENT_DETAIL_INFO, type ) );
-            }
-
             return UDPPacketParser.parseServerDetails(reply );
         }
         catch ( SocketTimeoutException ex )
@@ -125,12 +118,6 @@ public final class UDPGameQuerier implements GameQuerier
             sendPacket( socket, PacketType.CLIENT_FIND_SERVER );
             byte[] reply = recieve( socket );
             PacketType type = PacketType.fromInt( reply[2] );
-
-            if ( type != PacketType.SERVER_RESPONSE )
-            {
-                throw new JOTLException( String.format( "Expected packet type: %s. Received: %s.", PacketType.CLIENT_DETAIL_INFO, type ) );
-            }
-
             return UDPPacketParser.parseClientsDetails( reply );
         }
         catch ( SocketTimeoutException ex )
