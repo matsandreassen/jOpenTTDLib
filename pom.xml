@@ -19,6 +19,15 @@
 	<module>lib</module>
 	<module>cmd-line-client</module>
     </modules>
+    
+    <profiles>
+        <profile>
+            <id>Release</id>
+        </profile>
+        <profile>
+            <id>Shade</id>
+        </profile>
+    </profiles>
 
 </project>
 
