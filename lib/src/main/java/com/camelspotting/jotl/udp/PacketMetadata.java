@@ -20,7 +20,8 @@ public class PacketMetadata
 
     /**
      * The specified length of data packet
-     * @return 
+     *
+     * @return
      */
     public int getLength()
     {
@@ -29,7 +30,8 @@ public class PacketMetadata
 
     /**
      * The specified data packet type
-     * @return 
+     *
+     * @return
      */
     public PacketType getType()
     {
@@ -38,11 +40,18 @@ public class PacketMetadata
 
     /**
      * The specified UDP version of the data packet
-     * @return 
+     *
+     * @return
      */
     public int getVersion()
     {
         return version;
+    }
+
+    @Override
+    public String toString()
+    {
+        return String.format( "PacketMetadata: length=%d, type=%s, version=%d", length, type, version );
     }
 
     public static PacketMetadata parseMetadata( byte[] input )
