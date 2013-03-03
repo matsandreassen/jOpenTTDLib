@@ -16,7 +16,7 @@
  */
 package com.camelspotting.jotl.domain;
 
-import com.camelspotting.jotl.ServerInfo;
+import com.camelspotting.jotl.ClientsDetails;
 import com.camelspotting.jotl.parsing.Station;
 import com.camelspotting.jotl.parsing.Vehicle;
 import java.util.ArrayList;

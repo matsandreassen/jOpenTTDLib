@@ -16,9 +16,9 @@
  */
 package com.camelspotting.jotl.domain;
 
-import com.camelspotting.jotl.ClientsInfo;
+import com.camelspotting.jotl.ServerDetails;
 import com.camelspotting.jotl.ServerHandler;
-import com.camelspotting.jotl.ServerInfo;
+import com.camelspotting.jotl.ClientsDetails;
 
 /**
  * This method is is just a wrapper for response and detail information, and is
@@ -39,11 +39,11 @@ public class Game
     /**
      * One of the objects that will contain gathered information
      */
-    private final ClientsInfo clientsInfo;
+    private final ServerDetails clientsInfo;
     /**
      * One of the objects that will contain gathered information
      */
-    private final ServerInfo serverInfo;
+    private final ClientsDetails serverInfo;
     /**
      * Game ID
      */
@@ -55,7 +55,7 @@ public class Game
      * @param clientsInfo the information to contain
      * @param serverInfo more information to contain
      */
-    public Game( ClientsInfo sri, ServerInfo sdi )
+    public Game( ServerDetails sri, ClientsDetails sdi )
     {
         this.id = ++Game.id_inc;
         this.clientsInfo = sri;
@@ -67,7 +67,7 @@ public class Game
      *
      * @return the {@link ClientsInfo} object
      */
-    public ServerInfo getServerInfo()
+    public ClientsDetails getServerInfo()
     {
         return serverInfo;
     }
@@ -77,7 +77,7 @@ public class Game
      *
      * @return the {@link ServerInfo} object
      */
-    public ClientsInfo getClientsInfo()
+    public ServerDetails getClientsInfo()
     {
         return clientsInfo;
     }

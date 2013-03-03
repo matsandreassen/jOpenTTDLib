@@ -31,13 +31,13 @@ import org.slf4j.LoggerFactory;
  * @version 1.0
  * @see SendablePacketType
  */
-public final class ServerInfo
+public class ClientsDetails
 {
 
     /**
      * The logger object for this class
      */
-    private static final Logger LOG = LoggerFactory.getLogger( ClientsInfo.class );
+    private static final Logger LOG = LoggerFactory.getLogger( ServerDetails.class );
     /**
      * All companies
      */
@@ -45,16 +45,16 @@ public final class ServerInfo
     /**
      * All clients, both spectators and players
      */
-    private List<Client> clients;
+    private List<Client> allClients;
     /**
      * This holds the UDP packet version
      */
     private int version;
 
-    public ServerInfo( List<Company> companies, List<Client> clients, int version )
+    public ClientsDetails( List<Company> companies, List<Client> allClients, int version )
     {
         this.companies = companies;
-        this.clients = clients;
+        this.allClients = allClients;
         this.version = version;
     }
 
@@ -69,7 +69,7 @@ public final class ServerInfo
         {
             throw new UnsupportedOperationException( "This data is not available in UDP version 5." );
         }
-        return Collections.unmodifiableList( clients );
+        return Collections.unmodifiableList( allClients );
     }
 
     /**
@@ -107,9 +107,9 @@ public final class ServerInfo
         {
             throw new UnsupportedOperationException( "This data is not available in UDP version 5." );
         }
-        Collections.sort( clients );
+        Collections.sort( allClients );
         List<Client> list = new ArrayList<Client>();
-        for ( Client c : clients )
+        for ( Client c : allClients )
         {
             if ( c.isSpectator() != player )
             {
@@ -140,7 +140,7 @@ public final class ServerInfo
     @Override
     public String toString()
     {
-        StringBuilder sb = new StringBuilder( "\tServerDetailedInfo:\n" );
+        StringBuilder sb = new StringBuilder( "\tClientsDetails:\n" );
         sb.append( "\t\tCompanies: \n" );
         for ( Company com : getCompanies() )
         {

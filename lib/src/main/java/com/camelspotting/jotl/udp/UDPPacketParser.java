@@ -1,8 +1,8 @@
 package com.camelspotting.jotl.udp;
 
-import com.camelspotting.jotl.ClientsInfo;
+import com.camelspotting.jotl.ServerDetails;
 import com.camelspotting.jotl.GRFRequest;
-import com.camelspotting.jotl.ServerInfo;
+import com.camelspotting.jotl.ClientsDetails;
 import com.camelspotting.jotl.domain.Client;
 import com.camelspotting.jotl.domain.Company;
 import com.camelspotting.jotl.parsing.ParseUtil;
@@ -31,15 +31,16 @@ public class UDPPacketParser
     /**
      * Based on OpenTTD source code:
      * <ul>
-     * <li>Source file: src/network/core/udp.cpp</li>
-     * <li>Packet sending code: SendNetworkGameInfo</li>
-     * <li>Packet parsing code: ReceiveNetworkGameInfo</li>
+     * <li>Source file: src/network/core/network_udp.cpp</li>
+     * <li>Packet sending code: Receive_CLIENT_DETAIL_INFO</li>
+     * <li>Packet parsing code: ?</li>
      * </ul>
      *
      * @param data
+     * @see PacketType#CLIENT_DETAIL_INFO
      * @return
      */
-    public static ServerInfo parseServerInfo( byte[] data )
+    public static ClientsDetails parseClientsDetails( byte[] data )
     {
         int i = 3;
         int version = data[i++];
@@ -60,7 +61,7 @@ public class UDPPacketParser
         }
     }
 
-    private static ServerInfo parseVersion5( byte[] data, int activePlayers, int i )
+    private static ClientsDetails parseVersion5( byte[] data, int activePlayers, int i )
     {
         LOG.info( "Parsing version 5 info." );
         List<Company> companies = new ArrayList<Company>();
@@ -104,10 +105,10 @@ public class UDPPacketParser
             LOG.debug( "{} has {} stations.", com.getCurrentId(), com.getNumberOfStations() );
         }
 
-        return new ServerInfo( companies, null, 5 );
+        return new ClientsDetails( companies, null, 5 );
     }
 
-    private static ServerInfo parseVersion4( byte[] data, int activePlayers, int i )
+    private static ClientsDetails parseVersion4( byte[] data, int activePlayers, int i )
     {
         LOG.info( "Parsing version 4 info." );
         List<Company> companies = new ArrayList<Company>();
@@ -196,7 +197,7 @@ public class UDPPacketParser
             clients.add( client );
         }
 
-        return new ServerInfo( companies, clients, 4 );
+        return new ClientsDetails( companies, clients, 4 );
     }
 
     /**
@@ -208,9 +209,10 @@ public class UDPPacketParser
      * </ul>
      *
      * @param data
+     * @see PacketType#SERVER_RESPONSE
      * @return
      */
-    public static ClientsInfo parseClients( byte[] data )
+    public static ServerDetails parseServerDetails( byte[] data )
     {
         data = Arrays.copyOfRange( data, 3, data.length );
         int i = 0;
@@ -289,7 +291,7 @@ public class UDPPacketParser
         boolean dedicated = ( data[i++] == 1 );
         LOG.info( "Done parsing." );
 
-        return new ClientsInfo( grfs, serverName, gameDate, startDate, maxNumberOfCompanies, numberOfActiveCompanies, maximumNumberOfSpectators, numberOfSpectatorsOn, maximumNumberOfClients, numberOfActiveClients, gameVersion, serverLang, passwordProtected, dedicated, tileset, mapHeight, mapWidth, mapName );
+        return new ServerDetails( grfs, serverName, gameDate, startDate, maxNumberOfCompanies, numberOfActiveCompanies, maximumNumberOfSpectators, numberOfSpectatorsOn, maximumNumberOfClients, numberOfActiveClients, gameVersion, serverLang, passwordProtected, dedicated, tileset, mapHeight, mapWidth, mapName );
     }
 //
 //    /**

@@ -16,9 +16,9 @@
  */
 package com.camelspotting.jotl.udp;
 
-import com.camelspotting.jotl.ClientsInfo;
+import com.camelspotting.jotl.ServerDetails;
 import com.camelspotting.jotl.GameQuerier;
-import com.camelspotting.jotl.ServerInfo;
+import com.camelspotting.jotl.ClientsDetails;
 import com.camelspotting.jotl.domain.Game;
 import com.camelspotting.jotl.exceptions.JOTLException;
 import com.camelspotting.jotl.parsing.ParseUtil;
@@ -84,7 +84,7 @@ public final class UDPGameQuerier implements GameQuerier
     }
 
     @Override
-    public ClientsInfo getClientsInfo() throws JOTLException
+    public ServerDetails getServerDetails() throws JOTLException
     {
         DatagramSocket socket = null;
         try
@@ -99,7 +99,7 @@ public final class UDPGameQuerier implements GameQuerier
                 throw new JOTLException( String.format( "Expected packet type: %s. Received: %s.", PacketType.CLIENT_DETAIL_INFO, type ) );
             }
 
-            return UDPPacketParser.parseClients( reply );
+            return UDPPacketParser.parseServerDetails(reply );
         }
         catch ( SocketTimeoutException ex )
         {
@@ -116,7 +116,7 @@ public final class UDPGameQuerier implements GameQuerier
     }
 
     @Override
-    public ServerInfo getServerInfo() throws JOTLException
+    public ClientsDetails getClientsDetails() throws JOTLException
     {
         DatagramSocket socket = null;
         try
@@ -131,7 +131,7 @@ public final class UDPGameQuerier implements GameQuerier
                 throw new JOTLException( String.format( "Expected packet type: %s. Received: %s.", PacketType.CLIENT_DETAIL_INFO, type ) );
             }
 
-            return UDPPacketParser.parseServerInfo( reply );
+            return UDPPacketParser.parseClientsDetails( reply );
         }
         catch ( SocketTimeoutException ex )
         {
@@ -150,7 +150,7 @@ public final class UDPGameQuerier implements GameQuerier
     @Override
     public Game getAllInformation() throws JOTLException
     {
-        return new Game( getClientsInfo(), getServerInfo() );
+        return new Game( getServerDetails(), getClientsDetails() );
     }
 
     @Override

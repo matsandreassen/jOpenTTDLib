@@ -570,10 +570,10 @@ public class ServerHandler
             return false;
         }
 
-        ClientsInfo sriOld = lastUpdate.getClientsInfo();
-        ClientsInfo sriNew = curUpdate.getClientsInfo();
-        ServerInfo sdiOld = lastUpdate.getServerInfo();
-        ServerInfo sdiNew = curUpdate.getServerInfo();
+        ServerDetails sriOld = lastUpdate.getClientsInfo();
+        ServerDetails sriNew = curUpdate.getClientsInfo();
+        ClientsDetails sdiOld = lastUpdate.getServerInfo();
+        ClientsDetails sdiNew = curUpdate.getServerInfo();
 
         // Check terrain type
         if ( sriOld.getTileset() != sriNew.getTileset() )

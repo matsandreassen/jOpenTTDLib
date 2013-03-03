@@ -29,13 +29,13 @@ import org.slf4j.LoggerFactory;
  * @version 1.0
  * @see SendablePacketType
  */
-public final class ClientsInfo
+public final class ServerDetails
 {
 
     /**
      * The logger object for this class
      */
-    private static final Logger LOG = LoggerFactory.getLogger( ClientsInfo.class );
+    private static final Logger LOG = LoggerFactory.getLogger( ServerDetails.class );
     /**
      * The graphics requests
      */
@@ -109,7 +109,7 @@ public final class ClientsInfo
      */
     private String mapName;
 
-    public ClientsInfo( GRFRequest[] grfRequests, String serverName, LocalDate gameDate, LocalDate startDate, int maxCompanies, int onCompanies, int maxSpectators, int onSpectators, int maxClients, int onClients, int[] revision, int serverLang, boolean passwordProtected, boolean dedicated, int tileset, int mapHeight, int mapWidth, String mapName )
+    public ServerDetails( GRFRequest[] grfRequests, String serverName, LocalDate gameDate, LocalDate startDate, int maxCompanies, int onCompanies, int maxSpectators, int onSpectators, int maxClients, int onClients, int[] revision, int serverLang, boolean passwordProtected, boolean dedicated, int tileset, int mapHeight, int mapWidth, String mapName )
     {
         this.grfRequests = grfRequests;
         this.serverName = serverName;

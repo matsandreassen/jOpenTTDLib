@@ -12,20 +12,20 @@ public interface GameQuerier
 {
 
     /**
-     * Method for accessing client info.
+     * Method for accessing server details.
      *
      * @return the current {@link ClientsInfo} object or null if no info has
      * been collected
      */
-    ClientsInfo getClientsInfo() throws JOTLException;
+    ServerDetails getServerDetails() throws JOTLException;
 
     /**
-     * Method for accessing server info.
+     * Method for accessing details on the connected clients.
      *
      * @return the current {@link ServerInfo} object or null if no info has been
      * collected
      */
-    ServerInfo getServerInfo() throws JOTLException;
+    ClientsDetails getClientsDetails() throws JOTLException;
 
     /**
      * Method for getting all available information
