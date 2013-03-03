@@ -1,7 +1,7 @@
 package com.camelspotting.jotl.udp;
 
-import com.camelspotting.jotl.ServerDetails;
-import com.camelspotting.jotl.ClientsDetails;
+import com.camelspotting.jotl.domain.ServerDetails;
+import com.camelspotting.jotl.domain.ClientsDetails;
 import com.camelspotting.jotl.exceptions.JOTLException;
 import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;

@@ -16,7 +16,6 @@
  */
 package com.camelspotting.jotl.domain;
 
-import com.camelspotting.jotl.ClientsDetails;
 import com.camelspotting.jotl.parsing.Station;
 import com.camelspotting.jotl.parsing.Vehicle;
 import java.util.ArrayList;
@@ -91,7 +90,7 @@ public class Company implements Comparable<Company>
      * @param rating company's rating
      * @param pwProtected whether or not the company has been password protected
      */
-    public Company( int currentId, String companyName, int inaugerated, long companyValue, long balance, long income, int performance, boolean pwProtected )
+    public Company( int currentId, String companyName, int inaugerated, long companyValue, long balance, long income, int performance, boolean pwProtected, Map<Vehicle, Integer> vehicleCountMap, Map<Station, Integer> stationCountMap )
     {
         this.clients = new ArrayList<Client>();
         this.currentId = currentId;
@@ -102,8 +101,8 @@ public class Company implements Comparable<Company>
         this.income = income;
         this.rating = performance;
         this.pwProtected = pwProtected;
-        this.vehicleCountMap = new EnumMap<Vehicle, Integer>( Vehicle.class );
-        this.stationCountMap = new EnumMap<Station, Integer>( Station.class );
+        this.vehicleCountMap = vehicleCountMap;
+        this.stationCountMap = stationCountMap;
     }
 
     /**

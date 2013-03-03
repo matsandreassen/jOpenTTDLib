@@ -1,8 +1,8 @@
 package com.camelspotting.jotl.udp;
 
-import com.camelspotting.jotl.ServerDetails;
+import com.camelspotting.jotl.domain.ServerDetails;
 import com.camelspotting.jotl.GRFRequest;
-import com.camelspotting.jotl.ClientsDetails;
+import com.camelspotting.jotl.domain.ClientsDetails;
 import com.camelspotting.jotl.domain.Client;
 import com.camelspotting.jotl.domain.Company;
 import com.camelspotting.jotl.exceptions.JOTLException;
@@ -11,7 +11,9 @@ import com.camelspotting.jotl.parsing.Station;
 import com.camelspotting.jotl.parsing.Vehicle;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,7 +52,7 @@ public class UDPPacketParser
         PacketMetadata pm = verifyMetadata( data, PacketType.SERVER_DETAIL_INFO );
         int version = pm.getVersion();
         data = stripMetadata( data );
-        
+
         int i = 0;
         int activePlayers = data[i++];
 
@@ -92,25 +94,28 @@ public class UDPPacketParser
             i += 2;
             boolean passwordProtected = ( data[i++] == 1 );
 
-            Company com = new Company( current, compName, inaugurated, companyValue, money, income, performance, passwordProtected );
-            LOG.debug( "Created {}.", com );
-            companies.add( com );
 
-            /* vehicle info */
+            Map<Vehicle, Integer> vehicleCountMap = new EnumMap<Vehicle, Integer>( Vehicle.class );
+            // vehicle info
             for ( Vehicle v : Vehicle.values() )
             {
-                com.setNumberOfVehicles( v, BitUtil.parse16BitNumber( data, i ) );
+                vehicleCountMap.put( v, BitUtil.parse16BitNumber( data, i ) );
                 i += 2;
             }
-            LOG.debug( "{} has {} vehicles.", com.getCurrentId(), com.getNumberOfVehicles() );
 
-            /* station info */
+            // station info
+            Map<Station, Integer> stationCountMap = new EnumMap<Station, Integer>( Station.class );
             for ( Station s : Station.values() )
             {
-                com.setNumberOfStations( s, BitUtil.parse16BitNumber( data, i ) );
+                stationCountMap.put( s, BitUtil.parse16BitNumber( data, i ) );
                 i += 2;
             }
+
+            Company com = new Company( current, compName, inaugurated, companyValue, money, income, performance, passwordProtected, vehicleCountMap, stationCountMap );
+            LOG.debug( "Created {}.", com );
             LOG.debug( "{} has {} stations.", com.getCurrentId(), com.getNumberOfStations() );
+            LOG.debug( "{} has {} vehicles.", com.getCurrentId(), com.getNumberOfVehicles() );
+            companies.add( com );
         }
 
         return new ClientsDetails( companies, null, 5 );
@@ -140,24 +145,27 @@ public class UDPPacketParser
             i += 2;
             boolean passwordProtected = ( data[i++] == 1 );
 
-            Company com = new Company( current, compName, inaugurated, companyValue, money, income, performance, passwordProtected );
-            LOG.debug( "Created company: {}", com );
-            companies.add( com );
 
-            /* vehicle info */
+            // vehicle info
+            Map<Vehicle, Integer> vehicleCountMap = new EnumMap<Vehicle, Integer>( Vehicle.class );
             for ( Vehicle v : Vehicle.values() )
             {
-                com.setNumberOfVehicles( v, BitUtil.parse16BitNumber( data, i ) );
+                vehicleCountMap.put( v, BitUtil.parse16BitNumber( data, i ) );
                 i += 2;
             }
-            LOG.debug( "{} has {} vehicles.", com.getCurrentId(), com.getNumberOfVehicles() );
 
-            /* station info */
+            // station info
+            Map<Station, Integer> stationCountMap = new EnumMap<Station, Integer>( Station.class );
             for ( Station s : Station.values() )
             {
-                com.setNumberOfStations( s, BitUtil.parse16BitNumber( data, i ) );
+                stationCountMap.put( s, BitUtil.parse16BitNumber( data, i ) );
                 i += 2;
             }
+
+            Company com = new Company( current, compName, inaugurated, companyValue, money, income, performance, passwordProtected, vehicleCountMap, stationCountMap );
+            LOG.debug( "Created company: {}", com );
+            companies.add( com );
+            LOG.debug( "{} has {} vehicles.", com.getCurrentId(), com.getNumberOfVehicles() );
             LOG.debug( "{} has {} stations.", com.getCurrentId(), com.getNumberOfStations() );
 
             /* Get a list of clients connected to this company.

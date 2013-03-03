@@ -1,5 +1,7 @@
 package com.camelspotting.jotl;
 
+import com.camelspotting.jotl.domain.ServerDetails;
+import com.camelspotting.jotl.domain.ClientsDetails;
 import com.camelspotting.jotl.domain.Game;
 import com.camelspotting.jotl.domain.Server;
 import com.camelspotting.jotl.exceptions.JOTLException;

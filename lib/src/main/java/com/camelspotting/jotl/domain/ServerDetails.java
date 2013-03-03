@@ -14,8 +14,9 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package com.camelspotting.jotl;
+package com.camelspotting.jotl.domain;
 
+import com.camelspotting.jotl.GRFRequest;
 import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
