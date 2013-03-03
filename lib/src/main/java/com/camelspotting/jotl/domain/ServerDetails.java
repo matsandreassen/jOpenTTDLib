@@ -80,7 +80,7 @@ public final class ServerDetails
     /**
      * The game version
      */
-    private int[] revision;
+    private String gameVersion;
     /**
      * The language the server is running
      */
@@ -110,7 +110,7 @@ public final class ServerDetails
      */
     private String mapName;
 
-    public ServerDetails( GRFRequest[] grfRequests, String serverName, LocalDate gameDate, LocalDate startDate, int maxCompanies, int onCompanies, int maxSpectators, int onSpectators, int maxClients, int onClients, int[] revision, int serverLang, boolean passwordProtected, boolean dedicated, int tileset, int mapHeight, int mapWidth, String mapName )
+    public ServerDetails( GRFRequest[] grfRequests, String serverName, LocalDate gameDate, LocalDate startDate, int maxCompanies, int onCompanies, int maxSpectators, int onSpectators, int maxClients, int onClients, String gameVersion, int serverLang, boolean passwordProtected, boolean dedicated, int tileset, int mapHeight, int mapWidth, String mapName )
     {
         this.grfRequests = grfRequests;
         this.serverName = serverName;
@@ -122,7 +122,7 @@ public final class ServerDetails
         this.onSpectators = onSpectators;
         this.maxClients = maxClients;
         this.onClients = onClients;
-        this.revision = revision;
+        this.gameVersion = gameVersion;
         this.serverLang = serverLang;
         this.passwordProtected = passwordProtected;
         this.dedicated = dedicated;
@@ -143,28 +143,29 @@ public final class ServerDetails
     }
 
     /**
-     * Getter for the server version.
+     * Getter for the game version.
      *
-     * @return the server version
+     * @return the game version
      */
-    public int[] getVersion()
+    public String getVersion()
     {
-        return revision;
+        return gameVersion;
     }
 
     /**
-     * Getter for string representation of version.
+     * Getter for game version as components: major.minor.revision
      *
      * @return the server version, e.g. 0.5.3
      */
-    public String getVersionAsString()
+    public int[] getVersionComponents()
     {
-        String v = Integer.toString( revision[0] );
-        for ( int i = 1; i < revision.length; i++ )
+        String[] A = gameVersion.split( "\\." );
+        int[] B = new int[ A.length ];
+        for ( int i = 0; i < A.length; i++ )
         {
-            v += "." + revision[i];
+            B[i] = Integer.valueOf( A[i] );
         }
-        return v;
+        return B;
     }
 
     /**
@@ -174,7 +175,7 @@ public final class ServerDetails
      */
     public int getGraphicsCount()
     {
-        return grfRequests.length;
+        return grfRequests != null ? grfRequests.length : 0;
     }
 
     /**
@@ -189,17 +190,6 @@ public final class ServerDetails
     }
 
     /**
-     * Convenience method for getting the start date in a formatted manner with
-     * long month name.
-     *
-     * @return the formatted date
-     */
-    public String getLongStartDate()
-    {
-        return startDate.toString( "YYYY-MM-dd" );
-    }
-
-    /**
      * Method for getting the current game date so that other formatting may be
      * applied.
      *
@@ -208,17 +198,6 @@ public final class ServerDetails
     public LocalDate getGameDate()
     {
         return gameDate;
-    }
-
-    /**
-     * Convenience method for getting the game date in a formatted manner with
-     * long month name.
-     *
-     * @return the formatted date
-     */
-    public String getLongGameDate()
-    {
-        return gameDate.toString( "YYYY-MM-dd" );
     }
 
     /**
@@ -384,11 +363,10 @@ public final class ServerDetails
     {
         StringBuilder sb = new StringBuilder( "\tServerResponseInfo:\n" );
         sb.append( "\t\tServer name: " ).append( getServerName() ).append( "\n" );
-        sb.append( "\t\tOpenTTD version: " ).append( getVersionAsString() ).append( "\n" );
+        sb.append( "\t\tOpenTTD version: " ).append( getVersion() ).append( "\n" );
         sb.append( "\t\tNew graphics count: " ).append( getGraphicsCount() ).append( "\n" );
-        sb.append( "\t\tStart date: " ).append( getLongStartDate() ).append( "\n" );
-        sb.append( "\t\tGame date: " ).append( getLongGameDate() ).append( "\n" );
-        sb.append( "\t\tOpenTTD version: " ).append( getVersionAsString() ).append( "\n" );
+        sb.append( "\t\tStart date: " ).append( getStartDate().toString() ).append( "\n" );
+        sb.append( "\t\tGame date: " ).append( getGameDate().toString() ).append( "\n" );
         sb.append( "\t\tMax companies: " ).append( getMaxNumberOfCompanies() ).append( "\n" );
         sb.append( "\t\tActive companies: " ).append( getNumberOfActiveCompanies() ).append( "\n" );
         sb.append( "\t\tMax clients:: " ).append( getMaxNumberOfClients() ).append( "\n" );

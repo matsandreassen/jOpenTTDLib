@@ -5,6 +5,7 @@ import com.camelspotting.jotl.domain.ClientsDetails;
 import com.camelspotting.jotl.exceptions.JOTLException;
 import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
+import org.joda.time.LocalDate;
 import static org.junit.Assert.*;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -21,8 +22,27 @@ public class UDPPacketParserTest
     @Parameters( method = "parameters" )
     public void testParseServerDetails( TestCase testCase ) throws JOTLException
     {
-        ServerDetails clientsInfo = UDPPacketParser.parseServerDetails( testCase.getInput( PacketType.SERVER_RESPONSE ) );
-        assertNotNull( clientsInfo );
+        ServerDetails expected = testCase.getServerDetails();
+        ServerDetails actual = UDPPacketParser.parseServerDetails( testCase.getInput( PacketType.SERVER_RESPONSE ) );
+        assertNotNull( actual );
+
+        assertEquals( expected.getVersion(), actual.getVersion() );
+        assertEquals( expected.getGameDate(), actual.getGameDate() );
+        assertEquals( expected.getStartDate(), actual.getStartDate() );
+        assertEquals( expected.getServerName(), actual.getServerName() );
+        assertEquals( expected.getMapHeight(), actual.getMapHeight() );
+        assertEquals( expected.getMapWidth(), actual.getMapWidth() );
+        assertEquals( expected.getGraphicsCount(), actual.getGraphicsCount() );
+        assertEquals( expected.getMaxNumberOfClients(), actual.getMaxNumberOfClients() );
+        assertEquals( expected.getMaxNumberOfCompanies(), actual.getMaxNumberOfCompanies() );
+        assertEquals( expected.getMaxNumberOfSpectators(), actual.getMaxNumberOfSpectators() );
+        assertEquals( expected.getNumberOfActiveClients(), actual.getNumberOfActiveClients() );
+        assertEquals( expected.getNumberOfActiveCompanies(), actual.getNumberOfActiveCompanies() );
+        assertEquals( expected.getNumberOfActiveSpectators(), actual.getNumberOfActiveSpectators() );
+        assertEquals( expected.getServerLanguage(), actual.getServerLanguage() );
+        assertEquals( expected.getTileset(), actual.getTileset() );
+        assertEquals( expected.isDedicated(), actual.isDedicated() );
+        assertEquals( expected.isPasswordProtected(), actual.isPasswordProtected() );
     }
 
     private Object[] parameters()
@@ -34,24 +54,40 @@ public class UDPPacketParserTest
     @Parameters( method = "parameters" )
     public void testParseClientsDetails( TestCase testCase ) throws JOTLException
     {
-        ClientsDetails serverInfo = UDPPacketParser.parseClientsDetails( testCase.getInput( PacketType.SERVER_DETAIL_INFO ) );
-        assertNotNull( serverInfo );
+        ClientsDetails expected = testCase.getClientsDetails();
+        ClientsDetails actual = UDPPacketParser.parseClientsDetails( testCase.getInput( PacketType.SERVER_DETAIL_INFO ) );
+        assertNotNull( actual );
     }
 
     public enum TestCase
     {
 
-        G105( "1.0.5" );
-        private final String version;
+        G105;
 
-        private TestCase( String version )
+        private TestCase()
         {
-            this.version = version;
         }
 
-        public String getVersion()
+        public ClientsDetails getClientsDetails()
         {
-            return version;
+            switch ( this )
+            {
+                case G105:
+                    return null;
+                default:
+                    throw new UnsupportedOperationException( String.format( "Unsupported case: %s", this ) );
+            }
+        }
+
+        public ServerDetails getServerDetails()
+        {
+            switch ( this )
+            {
+                case G105:
+                    return new ServerDetails( null, "sd", new LocalDate( 1950, 1, 6 ), new LocalDate( 1950, 1, 1 ), 8, 1, 10, 0, 10, 1, "1.0.5", 0, false, false, 0, 256, 256, "Random Map" );
+                default:
+                    throw new UnsupportedOperationException( String.format( "Unsupported case: %s", this ) );
+            }
         }
 
         public byte[] getInput( PacketType pt )

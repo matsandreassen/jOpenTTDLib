@@ -58,23 +58,6 @@ public final class ParseUtil
     }
 
     /**
-     * Method for parsing the the server version into components.
-     *
-     * @param version the version to parse
-     * @return e.g.: { 0, 5, 3}
-     */
-    public static int[] parseVersion( String version )
-    {
-        String[] A = version.split( "\\." );
-        int[] B = new int[ A.length ];
-        for ( int i = 0; i < A.length; i++ )
-        {
-            B[i] = Integer.valueOf( A[i] );
-        }
-        return B;
-    }
-
-    /**
      * Finds first zero from offset.
      *
      * @param data the array to check

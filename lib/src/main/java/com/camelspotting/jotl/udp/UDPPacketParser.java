@@ -286,7 +286,7 @@ public class UDPPacketParser
         i += length + 1;
         length = ParseUtil.locateNextZero( data, i );
         LOG.debug( "Revision seems to be {} characters long.", length );
-        int[] gameVersion = ParseUtil.parseVersion( ParseUtil.parseString( data, i, length ).trim() );
+        String gameVersion = ParseUtil.parseString( data, i, length );
         i += length + 1;
         byte serverLang = data[i++];
         boolean passwordProtected = data[i++] == 1;
