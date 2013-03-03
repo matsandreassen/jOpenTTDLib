@@ -2,8 +2,10 @@ package com.camelspotting.jotl.udp;
 
 import com.camelspotting.jotl.domain.ServerDetails;
 import com.camelspotting.jotl.GRFRequest;
-import com.camelspotting.jotl.domain.ClientsDetails;
+import com.camelspotting.jotl.domain.ClientsDetailsV4;
 import com.camelspotting.jotl.domain.Client;
+import com.camelspotting.jotl.domain.ClientsDetails;
+import com.camelspotting.jotl.domain.ClientsDetailsV5;
 import com.camelspotting.jotl.domain.Company;
 import com.camelspotting.jotl.exceptions.JOTLException;
 import com.camelspotting.jotl.parsing.ParseUtil;
@@ -71,7 +73,7 @@ public class UDPPacketParser
         }
     }
 
-    private static ClientsDetails parseVersion5( byte[] data, int activePlayers, int i )
+    private static ClientsDetailsV5 parseVersion5( byte[] data, int activePlayers, int i )
     {
         LOG.info( "Parsing version 5 info." );
         List<Company> companies = new ArrayList<Company>();
@@ -118,10 +120,10 @@ public class UDPPacketParser
             companies.add( com );
         }
 
-        return new ClientsDetails( companies, null, 5 );
+        return new ClientsDetailsV5( companies );
     }
 
-    private static ClientsDetails parseVersion4( byte[] data, int activePlayers, int i )
+    private static ClientsDetailsV4 parseVersion4( byte[] data, int activePlayers, int i )
     {
         LOG.info( "Parsing version 4 info." );
         List<Company> companies = new ArrayList<Company>();
@@ -213,7 +215,7 @@ public class UDPPacketParser
             clients.add( client );
         }
 
-        return new ClientsDetails( companies, clients, 4 );
+        return new ClientsDetailsV4( companies, clients );
     }
 
     /**

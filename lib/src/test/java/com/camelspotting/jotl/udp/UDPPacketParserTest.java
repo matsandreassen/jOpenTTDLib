@@ -1,8 +1,17 @@
 package com.camelspotting.jotl.udp;
 
-import com.camelspotting.jotl.domain.ServerDetails;
+import com.camelspotting.jotl.domain.Client;
 import com.camelspotting.jotl.domain.ClientsDetails;
+import com.camelspotting.jotl.domain.ServerDetails;
+import com.camelspotting.jotl.domain.ClientsDetailsV4;
+import com.camelspotting.jotl.domain.ClientsDetailsV5;
+import com.camelspotting.jotl.domain.Company;
 import com.camelspotting.jotl.exceptions.JOTLException;
+import com.camelspotting.jotl.parsing.Station;
+import com.camelspotting.jotl.parsing.Vehicle;
+import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.List;
 import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
 import org.joda.time.LocalDate;
@@ -57,6 +66,45 @@ public class UDPPacketParserTest
         ClientsDetails expected = testCase.getClientsDetails();
         ClientsDetails actual = UDPPacketParser.parseClientsDetails( testCase.getInput( PacketType.SERVER_DETAIL_INFO ) );
         assertNotNull( actual );
+
+        assertEquals( expected.getCompanies().size(), actual.getCompanies().size() );
+        for ( int i = 0; i < expected.getCompanies().size(); i++ )
+        {
+            Company expectedCom = expected.getCompanies().get( i );
+            Company actualCom = actual.getCompanies().get( i );
+
+            assertEquals( expectedCom.getBalance(), actualCom.getBalance() );
+            assertEquals( expectedCom.getCompanyName(), actualCom.getCompanyName() );
+            assertEquals( expectedCom.getCompanyValue(), actualCom.getCompanyValue() );
+            assertEquals( expectedCom.getCurrentId(), actualCom.getCurrentId() );
+            assertEquals( expectedCom.getIncome(), actualCom.getIncome() );
+            assertEquals( expectedCom.getInaugerationYear(), actualCom.getInaugerationYear() );
+            assertEquals( expectedCom.getRating(), actualCom.getRating() );
+
+            for ( Vehicle v : Vehicle.values() )
+            {
+                assertEquals( expectedCom.getNumberOfVehicles().get( v ), actualCom.getNumberOfVehicles().get( v ) );
+            }
+
+            for ( Station s : Station.values() )
+            {
+                assertEquals( expectedCom.getNumberOfStations().get( s ), actualCom.getNumberOfStations().get( s ) );
+            }
+        }
+
+        if ( expected instanceof ClientsDetailsV4 )
+        {
+            assertEquals( expected.getClients().size(), actual.getClients().size() );
+            for ( int i = 0; i < expected.getClients().size(); i++ )
+            {
+                Client expectedClient = expected.getClients().get( i );
+                Client actualClient = actual.getClients().get( i );
+
+                assertEquals( expectedClient.getJoinDate(), actualClient.getJoinDate() );
+                assertEquals( expectedClient.getName(), actualClient.getName() );
+                assertEquals( expectedClient.getUniqueId(), actualClient.getUniqueId() );
+            }
+        }
     }
 
     public enum TestCase
@@ -73,7 +121,21 @@ public class UDPPacketParserTest
             switch ( this )
             {
                 case G105:
-                    return null;
+                    EnumMap<Vehicle, Integer> vehicleMap = new EnumMap<Vehicle, Integer>( Vehicle.class );
+                    for ( Vehicle vehicle : Vehicle.values() )
+                    {
+                        vehicleMap.put( vehicle, 0 );
+                    }
+                    EnumMap<Station, Integer> stationMap = new EnumMap<Station, Integer>( Station.class );
+                    for ( Station station : Station.values() )
+                    {
+                        stationMap.put( station, 0 );
+                    }
+
+                    List<Company> companies = new ArrayList<Company>();
+                    Company com = new Company( 0, "Unnamed", 1950, 0, 100000, 0, 0, false, vehicleMap, stationMap );
+                    companies.add( com );
+                    return new ClientsDetailsV5( companies );
                 default:
                     throw new UnsupportedOperationException( String.format( "Unsupported case: %s", this ) );
             }

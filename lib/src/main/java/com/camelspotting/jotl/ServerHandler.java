@@ -17,11 +17,12 @@
 package com.camelspotting.jotl;
 
 import com.camelspotting.jotl.domain.ServerDetails;
-import com.camelspotting.jotl.domain.ClientsDetails;
+import com.camelspotting.jotl.domain.ClientsDetailsV4;
 import com.camelspotting.jotl.domain.Company;
 import com.camelspotting.jotl.domain.Game;
 import com.camelspotting.jotl.exceptions.JOTLException;
 import com.camelspotting.jotl.domain.Client;
+import com.camelspotting.jotl.domain.ClientsDetails;
 import com.camelspotting.jotl.event.OpenTTDEvent;
 import com.camelspotting.jotl.event.OpenTTDEventType;
 import com.camelspotting.jotl.event.OpenTTDListener;
@@ -290,19 +291,19 @@ public class ServerHandler
         // Let's see if anything interesting has happened since last time
         LOG.debug( "Let's check this new update for changes." );
         boolean isSameGame = representsSameGame( lastUpdate, currentUpdate );
-        List<Company> lastList = ( lastUpdate != null ? lastUpdate.getServerInfo().getCompanies() : null );
-        List<Company> curList = currentUpdate.getServerInfo().getCompanies();
+        List<Company> lastList = ( lastUpdate != null ? lastUpdate.getClientDetails().getCompanies() : null );
+        List<Company> curList = currentUpdate.getClientDetails().getCompanies();
 
         // Has a new game started?
         OpenTTDEvent newgame = checkForNewGame( isSameGame, currentUpdate );
         if ( newgame != null )
         {
-            int diff = currentUpdate.getClientsInfo().getGameDate().compareTo( currentUpdate.getClientsInfo().getStartDate() );
+            int diff = currentUpdate.getServerDetails().getGameDate().compareTo( currentUpdate.getServerDetails().getStartDate() );
             if ( diff < 0 )
             {
                 // This is not a "new" game, but a game in progress
                 LOG.debug( "I found out a 'new game' was acually a game in progress." );
-                newgame = new OpenTTDEvent( OpenTTDEventType.GAME_IN_PROGRESS, Integer.valueOf( currentUpdate.getClientsInfo().getGameDate().getYear() ) );
+                newgame = new OpenTTDEvent( OpenTTDEventType.GAME_IN_PROGRESS, Integer.valueOf( currentUpdate.getServerDetails().getGameDate().getYear() ) );
             }
         }
         OpenTTDEvent endgame = checkForEndGame( isSameGame );
@@ -339,7 +340,7 @@ public class ServerHandler
             // A new game didn't start but we still have to see what
             // happens.
             // Has any type of new rail been made available?
-            OpenTTDEvent railEvent = checkForNewRail( currentUpdate.getClientsInfo().getGameDate().getYear() );
+            OpenTTDEvent railEvent = checkForNewRail( currentUpdate.getServerDetails().getGameDate().getYear() );
 
             // Do we have a new leader?
             OpenTTDEvent newLeader = checkForNewLeader( lastList, curList );
@@ -348,7 +349,7 @@ public class ServerHandler
             // Has the game been paused/unpaused?
             OpenTTDEvent pause = checkForPauseUnpaused( isSameGame );
             // Has any company been removed
-            List<OpenTTDEvent> removedEvents = checkForRemovedCompanies( isSameGame, lastUpdate.getServerInfo().getCompanies(), currentUpdate.getServerInfo().getCompanies() );
+            List<OpenTTDEvent> removedEvents = checkForRemovedCompanies( isSameGame, lastUpdate.getClientDetails().getCompanies(), currentUpdate.getClientDetails().getCompanies() );
 
             // Add the events to the queue
             if ( railEvent != null )
@@ -378,13 +379,13 @@ public class ServerHandler
         // from the SERVER_DETAILED_INFO-packet so the methods for
         // getting clients/spectators now throws exception if UDP-version
         // is higher than 4.
-        if ( lastUpdate.getServerInfo().getVersion() >= 5 )
+        if ( lastUpdate.getClientDetails() instanceof ClientsDetailsV4 )
         {
             if ( lastUpdate != null )
             {
                 // Did any clients join/leave?
-                List<Client> oldClients = lastUpdate.getServerInfo().getClients();
-                List<Client> newClients = currentUpdate.getServerInfo().getClients();
+                List<Client> oldClients = lastUpdate.getClientDetails().getClients();
+                List<Client> newClients = currentUpdate.getClientDetails().getClients();
                 List<OpenTTDEvent> joinEvents = checkForClientsJoined( oldClients, newClients );
                 List<OpenTTDEvent> leftEvents = checkForClientsLeft( oldClients, newClients );
 
@@ -393,7 +394,7 @@ public class ServerHandler
             }
             else
             {
-                List<Client> newClients = currentUpdate.getServerInfo().getClients();
+                List<Client> newClients = currentUpdate.getClientDetails().getClients();
                 if ( newClients.size() > 0 )
                 {
                     evts.add( new OpenTTDEvent( OpenTTDEventType.CLIENT_JOIN, (Object[]) newClients.toArray( new Client[ newClients.size() ] ) ) );
@@ -414,7 +415,7 @@ public class ServerHandler
 
     private int compareDates( Game lastUpdate, Game currentUpdate )
     {
-        return lastUpdate.getClientsInfo().getGameDate().compareTo( currentUpdate.getClientsInfo().getGameDate() );
+        return lastUpdate.getServerDetails().getGameDate().compareTo( currentUpdate.getServerDetails().getGameDate() );
     }
 
     /**
@@ -519,7 +520,7 @@ public class ServerHandler
                         LOG.debug( "Yes it has!" );
                         paused = false;
                         unpauseCounter = 0;
-                        evt = new OpenTTDEvent( OpenTTDEventType.UNPAUSED, Integer.valueOf( currentUpdate.getClientsInfo().getGameDate().getYear() ) );
+                        evt = new OpenTTDEvent( OpenTTDEventType.UNPAUSED, Integer.valueOf( currentUpdate.getServerDetails().getGameDate().getYear() ) );
                     }
                 }
                 LOG.debug( "No it hasn't." );
@@ -535,7 +536,7 @@ public class ServerHandler
                         LOG.debug( "Yes it has!" );
                         paused = true;
                         pauseCounter = 1;
-                        evt = new OpenTTDEvent( OpenTTDEventType.PAUSED, Integer.valueOf( currentUpdate.getClientsInfo().getGameDate().getYear() ) );
+                        evt = new OpenTTDEvent( OpenTTDEventType.PAUSED, Integer.valueOf( currentUpdate.getServerDetails().getGameDate().getYear() ) );
                     }
                 }
                 else
@@ -572,10 +573,10 @@ public class ServerHandler
             return false;
         }
 
-        ServerDetails sriOld = lastUpdate.getClientsInfo();
-        ServerDetails sriNew = curUpdate.getClientsInfo();
-        ClientsDetails sdiOld = lastUpdate.getServerInfo();
-        ClientsDetails sdiNew = curUpdate.getServerInfo();
+        ServerDetails sriOld = lastUpdate.getServerDetails();
+        ServerDetails sriNew = curUpdate.getServerDetails();
+        ClientsDetails sdiOld = lastUpdate.getClientDetails();
+        ClientsDetails sdiNew = curUpdate.getClientDetails();
 
         // Check terrain type
         if ( sriOld.getTileset() != sriNew.getTileset() )
@@ -688,7 +689,7 @@ public class ServerHandler
         // So if lastUpdate IS NOT null that means a game ended.
         if ( !sameGame && lastUpdate != null )
         {
-            evt = new OpenTTDEvent( OpenTTDEventType.GAME_END, Integer.valueOf( lastUpdate.getClientsInfo().getGameDate().getYear() ) );
+            evt = new OpenTTDEvent( OpenTTDEventType.GAME_END, Integer.valueOf( lastUpdate.getServerDetails().getGameDate().getYear() ) );
         }
         return evt;
     }
@@ -709,7 +710,7 @@ public class ServerHandler
         if ( !samegame )
         {
             // This means a new game has started! :)
-            evt = new OpenTTDEvent( OpenTTDEventType.GAME_START, Integer.valueOf( currentUpdate.getClientsInfo().getStartDate().getYear() ) );
+            evt = new OpenTTDEvent( OpenTTDEventType.GAME_START, Integer.valueOf( currentUpdate.getServerDetails().getStartDate().getYear() ) );
             // Let's reset some useful variables
             electricRail = false;
             monoRail = false;

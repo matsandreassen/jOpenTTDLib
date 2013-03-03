@@ -37,11 +37,11 @@ public class Game
     /**
      * One of the objects that will contain gathered information
      */
-    private final ServerDetails clientsInfo;
+    private final ServerDetails serverDetails;
     /**
      * One of the objects that will contain gathered information
      */
-    private final ClientsDetails serverInfo;
+    private final ClientsDetails clientDetails;
     /**
      * Game ID
      */
@@ -53,11 +53,11 @@ public class Game
      * @param clientsInfo the information to contain
      * @param serverInfo more information to contain
      */
-    public Game( ServerDetails sri, ClientsDetails sdi )
+    public Game( ServerDetails serverDetails, ClientsDetails clientDetails )
     {
         this.id = ++Game.id_inc;
-        this.clientsInfo = sri;
-        this.serverInfo = sdi;
+        this.serverDetails = serverDetails;
+        this.clientDetails = clientDetails;
     }
 
     /**
@@ -65,9 +65,9 @@ public class Game
      *
      * @return the {@link ClientsInfo} object
      */
-    public ClientsDetails getServerInfo()
+    public ClientsDetails getClientDetails()
     {
-        return serverInfo;
+        return clientDetails;
     }
 
     /**
@@ -75,17 +75,17 @@ public class Game
      *
      * @return the {@link ServerInfo} object
      */
-    public ServerDetails getClientsInfo()
+    public ServerDetails getServerDetails()
     {
-        return clientsInfo;
+        return serverDetails;
     }
 
     @Override
     public String toString()
     {
         StringBuilder sb = new StringBuilder( "Game: \n" );
-        sb.append( serverInfo.toString() );
-        sb.append( clientsInfo.toString() );
+        sb.append( clientDetails.toString() );
+        sb.append( serverDetails.toString() );
         return sb.toString();
     }
 }

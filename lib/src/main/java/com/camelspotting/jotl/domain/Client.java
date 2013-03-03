@@ -106,9 +106,9 @@ public class Client implements Comparable<Client>
      *
      * @return the join date
      */
-    public String getLongJoinDate()
+    public LocalDate getJoinDate()
     {
-        return joinDate.toString( "YYYY-MM-dd" );
+        return joinDate;
     }
 
     /**
@@ -129,7 +129,7 @@ public class Client implements Comparable<Client>
     @Override
     public String toString()
     {
-        return new StringBuilder( isSpectator() ? "Spectator" : "Client" ).append( ": name, " ).append( getName() ).append( ", join date: " ).append( getLongJoinDate() ).toString();
+        return new StringBuilder( isSpectator() ? "Spectator" : "Client" ).append( ": name, " ).append( getName() ).append( ", join date: " ).append( getJoinDate().toString() ).toString();
     }
 
     /**
