@@ -624,22 +624,19 @@ public class ServerHandler
             return false;
         }
         // Check language
-        int[] v1 = sriOld.getVersion();
-        int[] v2 = sriNew.getVersion();
         if ( sriOld.getServerLanguage() != sriNew.getServerLanguage() )
         {
             LOG.debug( "Comparing games: different server languages found." );
             return false;
         }
         // Check server version
-        for ( int i = 0; i < v1.length; i++ )
+        if ( !sriOld.getVersion().equalsIgnoreCase( sriNew.getVersion() ) )
         {
-            if ( v1[i] != v2[i] )
-            {
-                LOG.debug( "Comparing games: different server version found." );
-                return false;
-            }
+
+            LOG.debug( "Comparing games: different server version found." );
+            return false;
         }
+
         // Check dedication^^
         if ( sriOld.isDedicated() != sriNew.isDedicated() )
         {
