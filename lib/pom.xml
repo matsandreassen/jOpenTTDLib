@@ -14,6 +14,17 @@
         <slf4j.version>1.7.2</slf4j.version>
     </properties>
     
+    <developers>
+        <developer>
+            <id>Mats</id>
+            <email>matsa@pvv.ntnu.no</email>
+        </developer>
+        <developer>
+            <id>Eivind</id>
+            <email>eivbsmed@gmail.com</email>
+        </developer>
+    </developers>
+    
     <dependencies>
         <dependency>
             <groupId>junit</groupId>
