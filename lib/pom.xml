@@ -17,10 +17,12 @@
     <developers>
         <developer>
             <id>Mats</id>
+            <name>Mats Andreassen</name>
             <email>matsa@pvv.ntnu.no</email>
         </developer>
         <developer>
             <id>Eivind</id>
+            <name>Eivind Brandth Smedseng</name>
             <email>eivbsmed@gmail.com</email>
         </developer>
     </developers>
