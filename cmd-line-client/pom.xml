@@ -3,15 +3,10 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
+    <groupId>com.camelspotting</groupId>
     <artifactId>jopenttdlib-cmd-line-client</artifactId>
     <name>jOpenTTDLib Command Line Client</name>
-    
-    <parent>
-        <groupId>com.camelspotting</groupId>
-        <artifactId>jopenttdlib-parent</artifactId>
-        <version>trunk</version>
-        <relativePath>../parent/pom.xml</relativePath>
-    </parent>
+    <version>trunk</version>
     
     <dependencies>
         <dependency>
@@ -23,6 +18,7 @@
         <dependency>
             <groupId>com.beust</groupId>
             <artifactId>jcommander</artifactId>
+            <version>1.30</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
