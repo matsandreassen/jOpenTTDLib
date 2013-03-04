@@ -25,6 +25,12 @@
         </developer>
     </developers>
     
+    <scm>
+        <connection>scm:hg:http://hg.code.sf.net/p/jopenttdlib/code jopenttdlib-code</connection>
+        <developerConnection>scm:hg:https://hg.code.sf.net/p/jopenttdlib/code jopenttdlib-code</developerConnection>
+        <url>http://sourceforge.net/p/jopenttdlib/code/</url>
+    </scm>
+    
     <dependencies>
         <dependency>
             <groupId>junit</groupId>
