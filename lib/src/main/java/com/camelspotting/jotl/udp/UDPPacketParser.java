@@ -1,9 +1,7 @@
 package com.camelspotting.jotl.udp;
 
 import com.camelspotting.jotl.domain.ServerDetails;
-import com.camelspotting.jotl.GRFRequest;
-import com.camelspotting.jotl.domain.ClientsDetailsV4;
-import com.camelspotting.jotl.domain.Client;
+import com.camelspotting.jotl.NewGRF;
 import com.camelspotting.jotl.domain.ClientsDetails;
 import com.camelspotting.jotl.domain.ClientsDetailsV5;
 import com.camelspotting.jotl.domain.Company;
@@ -58,19 +56,12 @@ public class UDPPacketParser
         int i = 0;
         int activePlayers = data[i++];
 
-        switch ( version )
+        if ( version < 4 )
         {
-            case 6:
-            case 5:
-                return parseVersion5( data, activePlayers, i );
-            case 4:
-            case 3:
-            case 2:
-            case 1:
-                return parseVersion4( data, activePlayers, i );
-            default:
-                throw new IllegalArgumentException( String.format( "Unsupported packet version: %d", version ) );
+            throw new IllegalArgumentException( String.format( "Unsupported packet version: %d", version ) );
         }
+
+        return parseVersion5( data, activePlayers, i );
     }
 
     private static ClientsDetailsV5 parseVersion5( byte[] data, int activePlayers, int i )
@@ -123,101 +114,6 @@ public class UDPPacketParser
         return new ClientsDetailsV5( companies );
     }
 
-    private static ClientsDetailsV4 parseVersion4( byte[] data, int activePlayers, int i )
-    {
-        LOG.info( "Parsing version 4 info." );
-        List<Company> companies = new ArrayList<Company>();
-        List<Client> clients = new ArrayList<Client>();
-        for ( int j = 0; j < activePlayers; j++ )
-        {
-            int current = data[i++];
-            int length = ParseUtil.locateNextZero( data, i );
-            LOG.debug( "New company name seems to be {} characters long.", length );
-            String compName = ParseUtil.parseString( data, i, length );
-            i += length + 1;
-            int inaugurated = BitUtil.parse32BitNumber( data, i );
-            i += 4;
-            long companyValue = BitUtil.parse64BitNumber( data, i );
-            i += 8;
-            long money = BitUtil.parse64BitNumber( data, i );
-            i += 8;
-            long income = BitUtil.parse64BitNumber( data, i );
-            i += 8;
-            int performance = BitUtil.parse16BitNumber( data, i );
-            i += 2;
-            boolean passwordProtected = ( data[i++] == 1 );
-
-
-            // vehicle info
-            Map<Vehicle, Integer> vehicleCountMap = new EnumMap<Vehicle, Integer>( Vehicle.class );
-            for ( Vehicle v : Vehicle.values() )
-            {
-                vehicleCountMap.put( v, BitUtil.parse16BitNumber( data, i ) );
-                i += 2;
-            }
-
-            // station info
-            Map<Station, Integer> stationCountMap = new EnumMap<Station, Integer>( Station.class );
-            for ( Station s : Station.values() )
-            {
-                stationCountMap.put( s, BitUtil.parse16BitNumber( data, i ) );
-                i += 2;
-            }
-
-            Company com = new Company( current, compName, inaugurated, companyValue, money, income, performance, passwordProtected, vehicleCountMap, stationCountMap );
-            LOG.debug( "Created company: {}", com );
-            companies.add( com );
-            LOG.debug( "{} has {} vehicles.", com.getCurrentId(), com.getNumberOfVehicles() );
-            LOG.debug( "{} has {} stations.", com.getCurrentId(), com.getNumberOfStations() );
-
-            /* Get a list of clients connected to this company.
-             * At this point we read a boolean value from the buffer, if > 0 there is another client
-             */
-            while ( data[i++] > 0 )
-            {
-                length = ParseUtil.locateNextZero( data, i );
-                String cName = ParseUtil.parseString( data, i, length );
-                i += length + 1;
-                length = ParseUtil.locateNextZero( data, i );
-                String uniqueId = ParseUtil.parseString( data, i, length );
-                i += length + 1;
-                // join_date is transmitted in 
-                LocalDate joinDate = DateUtil.convertDateToYMD( BitUtil.parse32BitNumber( data, i ) );
-                i += 4;
-
-                Client client = new Client( cName, uniqueId, joinDate, false, com );
-                LOG.debug( "Found '{}' connected to company {}.", client, com.getCurrentId() );
-                com.addClient( client );
-                clients.add( client );
-            }
-        }
-
-        // Now let's parse any spectators
-        while ( data[i++] > 0 )
-        {
-            int length = ParseUtil.locateNextZero( data, i );
-            String cName = ParseUtil.parseString( data, i, length );
-            // If this is the unreal spectator that is always present on the server.
-            if ( cName.equals( "" ) )
-            {
-                LOG.debug( "Ignoring unreal spectator." );
-                continue;
-            }
-            i += length + 1;
-            length = ParseUtil.locateNextZero( data, i );
-            String uniqueId = ParseUtil.parseString( data, i, length );
-            i += length + 1;
-            LocalDate joinDate = DateUtil.convertDateToYMD( BitUtil.parse32BitNumber( data, i ) );
-            i += 4;
-
-            Client client = new Client( cName, uniqueId, joinDate, true, null );
-            LOG.debug( "Found spectator '" + client + "'." );
-            clients.add( client );
-        }
-
-        return new ClientsDetailsV4( companies, clients );
-    }
-
     /**
      * Based on OpenTTD source code:
      * <ul>
@@ -237,22 +133,23 @@ public class UDPPacketParser
         data = stripMetadata( data );
 
         int i = 0;
-        GRFRequest[] grfs = null;
+        List<NewGRF> grfs = null;
         if ( version >= 4 )
         {
             LOG.info( "Processing version 4 data." );
-            grfs = new GRFRequest[ BitUtil.parse8BitNumber( data, i++ ) ];
-            for ( int j = 0; j < grfs.length; j++ )
+            int grfCount = BitUtil.parse8BitNumber( data, i++ );
+            grfs = new ArrayList<NewGRF>();
+            for ( int j = 0; j < grfCount; j++ )
             {
                 String id = Integer.toHexString( BitUtil.parse32BitNumber( data, i ) ).toUpperCase();
                 i += 4;
                 String md5 = "";
                 for ( int k = 0; k < 16; k++ )
                 {
-                    md5 += BitUtil.parse8BitNumber( data, i++ );
+                    md5 += Integer.toHexString( BitUtil.parse8BitNumber( data, i++ ) );
                 }
                 md5 = md5.toUpperCase();
-                grfs[j] = new GRFRequest( id, md5 );
+                grfs.add( new NewGRF( id, md5 ) );
             }
         }
 

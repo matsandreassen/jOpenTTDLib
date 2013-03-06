@@ -18,10 +18,7 @@ package com.camelspotting.jotl.domain;
 
 import com.camelspotting.jotl.parsing.Station;
 import com.camelspotting.jotl.parsing.Vehicle;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.EnumMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -73,10 +70,6 @@ public class Company implements Comparable<Company>
      * The station count
      */
     private final Map<Station, Integer> stationCountMap;
-    /**
-     * Clients connected to this company
-     */
-    private final ArrayList<Client> clients;
 
     /**
      * The constructor for companies.
@@ -92,7 +85,6 @@ public class Company implements Comparable<Company>
      */
     public Company( int currentId, String companyName, int inaugerated, long companyValue, long balance, long income, int performance, boolean pwProtected, Map<Vehicle, Integer> vehicleCountMap, Map<Station, Integer> stationCountMap )
     {
-        this.clients = new ArrayList<Client>();
         this.currentId = currentId;
         this.companyName = companyName;
         this.inaugerated = inaugerated;
@@ -103,26 +95,6 @@ public class Company implements Comparable<Company>
         this.pwProtected = pwProtected;
         this.vehicleCountMap = vehicleCountMap;
         this.stationCountMap = stationCountMap;
-    }
-
-    /**
-     * Method for adding a new {@link Client} to this company
-     *
-     * @param c the {@link Client} to add
-     */
-    public void addClient( Client c )
-    {
-        clients.add( c );
-    }
-
-    /**
-     * Method for accessing the {@link Client}s connected to this company.
-     *
-     * @return an {@link ArrayList} containing the {@link Client}s
-     */
-    public List<Client> getClients()
-    {
-        return Collections.unmodifiableList( clients );
     }
 
     /**

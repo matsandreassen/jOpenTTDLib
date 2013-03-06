@@ -8,7 +8,6 @@ import java.util.List;
  */
 public interface ClientsDetails
 {
+
     List<Company> getCompanies();
-    
-    List<Client> getClients();
 }

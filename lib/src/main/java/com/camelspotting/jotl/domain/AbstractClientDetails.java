@@ -38,33 +38,6 @@ public abstract class AbstractClientDetails implements ClientsDetails
         for ( Company com : getCompanies() )
         {
             sb.append( "\t\t\t" ).append( com ).append( "\n" );
-            if ( this instanceof ClientsDetailsV4 )
-            {
-                ClientsDetailsV4 v4 = (ClientsDetailsV4) this;
-                List<Client> clients = v4.getPlayers();
-                if ( clients.size() > 0 )
-                {
-                    sb.append( "\t\t\t\tClients:\n" );
-                    for ( Client c : clients )
-                    {
-                        sb.append( "\t\t\t\t\t" ).append( c ).append( "\n" );
-                    }
-                }
-            }
-        }
-
-        if ( this instanceof ClientsDetailsV4 )
-        {
-            ClientsDetailsV4 v4 = (ClientsDetailsV4) this;
-            List<Client> clients = v4.getSpectators();
-            if ( clients.size() > 0 )
-            {
-                sb.append( "\t\tSpectators:\n" );
-                for ( Client c : clients )
-                {
-                    sb.append( "\t\t\t" ).append( c ).append( "\n" );
-                }
-            }
         }
         return sb.toString();
     }

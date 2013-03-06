@@ -16,7 +16,8 @@
  */
 package com.camelspotting.jotl.domain;
 
-import com.camelspotting.jotl.GRFRequest;
+import com.camelspotting.jotl.NewGRF;
+import java.util.List;
 import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,9 +39,9 @@ public final class ServerDetails
      */
     private static final Logger LOG = LoggerFactory.getLogger( ServerDetails.class );
     /**
-     * The graphics requests
+     * The NewGRFs in use
      */
-    private GRFRequest[] grfRequests;
+    private List<NewGRF> newGRFs;
     /**
      * The server's name
      */
@@ -110,9 +111,9 @@ public final class ServerDetails
      */
     private String mapName;
 
-    public ServerDetails( GRFRequest[] grfRequests, String serverName, LocalDate gameDate, LocalDate startDate, int maxCompanies, int onCompanies, int maxSpectators, int onSpectators, int maxClients, int onClients, String gameVersion, int serverLang, boolean passwordProtected, boolean dedicated, int tileset, int mapHeight, int mapWidth, String mapName )
+    public ServerDetails( List<NewGRF> newGRFs, String serverName, LocalDate gameDate, LocalDate startDate, int maxCompanies, int onCompanies, int maxSpectators, int onSpectators, int maxClients, int onClients, String gameVersion, int serverLang, boolean passwordProtected, boolean dedicated, int tileset, int mapHeight, int mapWidth, String mapName )
     {
-        this.grfRequests = grfRequests;
+        this.newGRFs = newGRFs;
         this.serverName = serverName;
         this.gameDate = gameDate;
         this.startDate = startDate;
@@ -175,7 +176,12 @@ public final class ServerDetails
      */
     public int getGraphicsCount()
     {
-        return grfRequests != null ? grfRequests.length : 0;
+        return newGRFs != null ? newGRFs.size() : 0;
+    }
+
+    public List<NewGRF> getNewGRFs()
+    {
+        return newGRFs;
     }
 
     /**

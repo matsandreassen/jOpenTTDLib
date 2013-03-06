@@ -70,14 +70,6 @@ public enum OpenTTDEventType
      */
     UNPAUSED( "Unpaused" ),
     /**
-     * A client has joined
-     */
-    CLIENT_JOIN( "Client joined" ),
-    /**
-     * A client has left
-     */
-    CLIENT_LEFT( "Client left" ),
-    /**
      * Software has lost connection to server
      */
     LOST_CONNECTION( "Lost connection" );

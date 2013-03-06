@@ -17,11 +17,9 @@
 package com.camelspotting.jotl;
 
 import com.camelspotting.jotl.domain.ServerDetails;
-import com.camelspotting.jotl.domain.ClientsDetailsV4;
 import com.camelspotting.jotl.domain.Company;
 import com.camelspotting.jotl.domain.Game;
 import com.camelspotting.jotl.exceptions.JOTLException;
-import com.camelspotting.jotl.domain.Client;
 import com.camelspotting.jotl.domain.ClientsDetails;
 import com.camelspotting.jotl.event.OpenTTDEvent;
 import com.camelspotting.jotl.event.OpenTTDEventType;
@@ -374,34 +372,6 @@ public class ServerMonitor
             }
         }
 
-        // This check will prevent the scoped code from throwing any exceptions.
-        // As of version OpenTTD 0.6.2, all client info has been dropped
-        // from the SERVER_DETAILED_INFO-packet so the methods for
-        // getting clients/spectators now throws exception if UDP-version
-        // is higher than 4.
-        if ( lastUpdate != null && lastUpdate.getClientDetails() instanceof ClientsDetailsV4 )
-        {
-            if ( lastUpdate != null )
-            {
-                // Did any clients join/leave?
-                List<Client> oldClients = lastUpdate.getClientDetails().getClients();
-                List<Client> newClients = currentUpdate.getClientDetails().getClients();
-                List<OpenTTDEvent> joinEvents = checkForClientsJoined( oldClients, newClients );
-                List<OpenTTDEvent> leftEvents = checkForClientsLeft( oldClients, newClients );
-
-                evts.addAll( joinEvents );
-                evts.addAll( leftEvents );
-            }
-            else
-            {
-                List<Client> newClients = currentUpdate.getClientDetails().getClients();
-                if ( newClients.size() > 0 )
-                {
-                    evts.add( new OpenTTDEvent( OpenTTDEventType.CLIENT_JOIN, (Object[]) newClients.toArray( new Client[ newClients.size() ] ) ) );
-                }
-            }
-        }
-
         if ( evts.size() > 0 )
         {
             fireEvents( evts );
@@ -439,57 +409,6 @@ public class ServerMonitor
                 if ( !newList.contains( com ) )
                 {
                     evts.add( new OpenTTDEvent( OpenTTDEventType.COMPANY_REMOVED, com ) );
-                }
-            }
-        }
-        return evts;
-    }
-
-    /**
-     * This method will compare the client-lists and determine whether any
-     * clients have left.
-     *
-     * @param oldList the {@link List} of {@link Client}s from the last query
-     * @param newList the {@link List} of {@link Client}s from the current query
-     * @return an {@link OpenTTDEvent} of type CLIENT_LEFT or null
-     */
-    private List<OpenTTDEvent> checkForClientsLeft( List<Client> oldList, List<Client> newList )
-    {
-        List<OpenTTDEvent> evts = new ArrayList<OpenTTDEvent>();
-        for ( Client client : oldList )
-        {
-            if ( !client.isSpectator() && !newList.contains( client ) )
-            {
-                evts.add( new OpenTTDEvent( OpenTTDEventType.CLIENT_LEFT, client ) );
-            }
-        }
-        return evts;
-    }
-
-    /**
-     * This method will compare the client-lists and determine whether any
-     * clients have joined.
-     *
-     * @param oldList the {@link List} of {@link Client}s from the last query
-     * @param newList the {@link List} of {@link Client}s from the current query
-     * @return an {@link OpenTTDEvent} of type CLIENT_JOIN or null
-     */
-    private List<OpenTTDEvent> checkForClientsJoined( List<Client> oldList, List<Client> newList )
-    {
-        List<OpenTTDEvent> evts = new ArrayList<OpenTTDEvent>();
-        for ( Client client : newList )
-        {
-            LOG.debug( "Checking {}.", client );
-            if ( !client.isSpectator() )
-            {
-                if ( oldList.contains( client ) )
-                {
-                    LOG.debug( "{} was already playing.", client );
-                }
-                else
-                {
-                    LOG.debug( "{} is new! Generating event.", client );
-                    evts.add( new OpenTTDEvent( OpenTTDEventType.CLIENT_JOIN, client ) );
                 }
             }
         }

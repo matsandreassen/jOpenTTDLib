@@ -13,10 +13,4 @@ public class ClientsDetailsV5 extends AbstractClientDetails
     {
         super( companies );
     }
-
-    @Override
-    public List<Client> getClients()
-    {
-        throw new UnsupportedOperationException( "Not supported in version 5+." );
-    }
 }
