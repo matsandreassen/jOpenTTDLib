@@ -102,4 +102,10 @@ public class GRFRequest
     {
         return md5Check;
     }
+
+    @Override
+    public String toString()
+    {
+        return String.format( "NewGRF: id(%s), name(%s), mdf(%s)", id, name, md5Check );
+    }
 }
