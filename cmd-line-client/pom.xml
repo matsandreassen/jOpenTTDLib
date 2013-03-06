@@ -6,7 +6,7 @@
     <groupId>com.camelspotting</groupId>
     <artifactId>jopenttdlib-cmd-line-client</artifactId>
     <name>jOpenTTDLib Command Line Client</name>
-    <version>trunk</version>
+    <version>2.0.0</version>
     
     <dependencies>
         <dependency>

@@ -5,7 +5,7 @@
 
     <groupId>com.camelspotting</groupId>
     <artifactId>jopenttdlib</artifactId>
-    <version>trunk</version>
+    <version>2.0.0</version>
     <name>jOpenTTDLib</name>
     
     <url>http://sourceforge.net/projects/jopenttdlib/</url>
